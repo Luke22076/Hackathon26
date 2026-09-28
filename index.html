@@ -1,199 +1,403 @@
 <!DOCTYPE html>
 <html lang="de">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <head>
-<title>The Heating Company</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+<title>The Heating Company | Schutz vor Hitze</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root {
+--transition: 0.3s ease;
+--brand: #ff6b35;
+--brand-dark: #e85a24;
+--glass-bg: rgba(255,255,255,0.7);
+--card-bg: #ffffff;
+}
+* { scroll-behavior: smooth; }
+body {
+transition: background-color var(--transition), color var(--transition);
+min-height: 100vh;
+background:
+radial-gradient(circle at 10% 10%, rgba(255,193,7,0.10), transparent 40%),
+radial-gradient(circle at 90% 20%, rgba(220,53,69,0.10), transparent 45%),
+#f7f8fa;
+font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- Dark Mode ---------- */
+body.dark-mode {
+--glass-bg: rgba(40,40,40,0.7);
+--card-bg: #2a2a2a;
+background:
+radial-gradient(circle at 10% 10%, rgba(255,193,7,0.06), transparent 40%),
+radial-gradient(circle at 90% 20%, rgba(220,53,69,0.08), transparent 45%),
+#161616;
+color: #e0e0e0;
+}
+body.dark-mode .card,
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .list-group-item {
+background-color: var(--card-bg);
+color: #e0e0e0;
+border-color: #444;
+}
+body.dark-mode .form-control::placeholder { color: #888; }
+body.dark-mode .navbar,
+body.dark-mode .bg-light,
+body.dark-mode .nav-foot { background-color: #1e1e1e !important; }
+body.dark-mode .nav-link,
+body.dark-mode .navbar-brand { color: #e0e0e0 !important; }
+body.dark-mode .text-muted { color: #9a9a9a !important; }
+body.dark-mode .info-tile { background: #242424; }
+
+/* ---------- Navbar ---------- */
+.navbar {
+backdrop-filter: blur(10px);
+box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+.navbar-brand img { transition: transform var(--transition); }
+.navbar-brand:hover img { transform: scale(1.05); }
+.nav-link { font-weight: 500; position: relative; }
+.nav-link.active::after {
+content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
+height: 3px; border-radius: 3px; background: var(--brand);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+background: linear-gradient(135deg, #ff6b35, #f7931e, #dc3545);
+color: #fff; border-radius: 24px; padding: 3rem;
+box-shadow: 0 12px 40px rgba(255,107,53,0.25);
+position: relative; overflow: hidden;
+}
+.hero::after {
+content: "\F5A6"; font-family: "bootstrap-icons";
+position: absolute; right: -20px; top: -30px;
+font-size: 12rem; opacity: 0.15;
+}
+.hero h1 { font-weight: 800; font-size: 2.5rem; }
+.hero p { font-size: 1.1rem; opacity: 0.95; }
+
+/* ---------- Cards ---------- */
+.card {
+background: var(--card-bg);
+border: 1px solid rgba(0,0,0,0.06);
+border-radius: 18px;
+transition: transform var(--transition), box-shadow var(--transition);
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+.glass { background: var(--glass-bg); backdrop-filter: blur(8px); }
+
+.btn-brand {
+background: var(--brand); color: #fff; border: none; font-weight: 600;
+transition: all var(--transition);
+}
+.btn-brand:hover { background: var(--brand-dark); color: #fff; transform: translateY(-2px); }
+
+/* ---------- Info tiles ---------- */
+.info-tile {
+background: #f1f3f5; border-radius: 14px; padding: 20px;
+text-align: center; height: 100%; transition: transform var(--transition);
+}
+.info-tile:hover { transform: translateY(-4px); }
+.info-tile .big { font-size: 1.8rem; font-weight: 700; color: var(--brand); }
+.info-tile .lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; opacity: .7; }
+.info-tile .desc { font-size: 0.85rem; color: #666; margin-top: 8px; }
+
+/* ---------- Service Cards ---------- */
+.service-card {
+border: none;
+transition: all var(--transition);
+}
+.service-card .card-body {
+display: flex; flex-direction: column; gap: 12px;
+}
+.service-icon {
+font-size: 2.5rem;
+color: var(--brand);
+}
+.service-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 16px 40px rgba(255,107,53,0.2);
+}
+.service-card .btn { margin-top: auto; }
+
+/* ---------- Tips Section ---------- */
+.tips-section {
+background: var(--card-bg);
+border-radius: 18px;
+padding: 2rem;
+}
+.tip-item {
+padding: 16px;
+border-radius: 12px;
+background: var(--glass-bg);
+border-left: 4px solid var(--brand);
+}
+.tip-item h6 { color: var(--brand); font-weight: 700; }
+.tip-item p { margin: 8px 0 0 0; font-size: 0.9rem; }
+
+/* ---------- Footer ---------- */
+.nav-foot { background: #fff; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.06); }
+footer { margin-top: 10px; padding: 20px; }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+.theme-toggle { cursor: pointer; transition: transform var(--transition); }
+.theme-toggle:hover { transform: rotate(20deg) scale(1.15); }
+
+/* ---------- Back to Top ---------- */
+#toTop {
+position: fixed; bottom: 24px; right: 24px;
+width: 48px; height: 48px;
+display: none; z-index: 1000;
+border-radius: 50%;
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+#toTop:hover { transform: translateY(-4px); }
+</style>
 </head>
-  
+
 <body>
-<nav class="navbar navbar-expand-lg bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="./index.html">
-      <img src="./img/heatingcomp_logo.png" alt="Bootstrap" width="120" height="58">
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="./trinkrechner.html">Trinkrechner</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="./heatmap.html">Hitze Karte</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="./hitzewarner.html">Hitzewarner</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="./about.html">Über uns</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="./contact.html">Kontakt</a>
-        </li>
-      </ul>
-    </div>
-  </div>
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar navbar-expand-lg bg-light sticky-top">
+<div class="container-fluid">
+<a class="navbar-brand" href="./index.html">
+<img src="./img/heatingcomp_logo.png" alt="Logo" width="120" height="58">
+</a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarNav">
+<ul class="navbar-nav">
+<li class="nav-item"><a class="nav-link active" aria-current="page" href="./index.html">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trinkrechner</a></li>
+<li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+<li class="nav-item"><a class="nav-link" href="./hitzewarner.html">Hitzewarner</a></li>
+<li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+<li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+</ul>
+<div class="ms-auto d-flex align-items-center gap-3">
+<span class="small text-muted d-none d-lg-inline" id="liveClock"></span>
+<i class="bi bi-moon-stars-fill fs-4 theme-toggle" id="themeToggle" title="Dark Mode umschalten"></i>
+</div>
+</div>
+</div>
 </nav>
 
-<!-- Hero Section -->
-<div class="hero-section text-center py-5 bg-light">
-<h1 class="display-4 mb-4">Willkommen auf unserer Website!</h1>
-<p class="lead">Schutz vor Hitze - für eine gesündere Zukunft</p>
+<div class="container my-5">
+
+<!-- ===================== HERO ===================== -->
+<div class="hero mb-5 fade-in">
+<h1 class="mb-3"><i class="bi bi-thermometer-high"></i> Schutz vor Hitze</h1>
+<p class="mb-0 fs-5">Bleibe sicher, informiert und hydratisiert. The Heating Company bietet dir innovative Tools und Tipps, um hitzebedingte Risiken zu minimieren.</p>
 </div>
 
-<!-- Main Content -->
-<div class="in-content">
-<div class="container">
-<!-- Mission Statement -->
-<section class="mission-section py-5">
-<div class="row align-items-center">
+<!-- ===================== MISSION ===================== -->
+<section class="mb-5">
+<div class="row g-4 align-items-center">
 <div class="col-lg-6">
-<h2>Unsere Mission</h2>
-<h4 class="text-muted mb-3">Die Bevölkerung vor extremer Hitze schützen</h4>
-<p>
-Unser Ziel ist es, innovative Lösungen zu entwickeln, die den Alltag unserer Nutzer erleichtern und verbessern. Wir legen großen Wert auf Benutzerfreundlichkeit, Design und Funktionalität.
-</p>
-<p>
-The Heating Company hat es sich zur Aufgabe gemacht, Informationen und Tools bereitzustellen, um die Bevölkerung in Zeiten von extremer Hitze zu unterstützen und zu schützen.
-</p>
+<h2 class="mb-3"><i class="bi bi-shield-check"></i> Unsere Mission</h2>
+<p class="lead">Die Bevölkerung vor extremer Hitze schützen</p>
+<p>Unser Ziel ist es, innovative Lösungen zu entwickeln, die den Alltag unserer Nutzer erleichtern und verbessern. Wir legen großen Wert auf Benutzerfreundlichkeit, Design und Funktionalität.</p>
+<p class="text-muted">The Heating Company hat es sich zur Aufgabe gemacht, Informationen und Tools bereitzustellen, um die Bevölkerung in Zeiten von extremer Hitze zu unterstützen und zu schützen.</p>
+<a href="./about.html" class="btn btn-brand btn-lg"><i class="bi bi-arrow-right"></i> Mehr über uns</a>
 </div>
 <div class="col-lg-6">
-<img src="./img/heatingcomp_logo.png" alt="Heating Company Logo" class="img-fluid rounded">
+<div class="info-tile" style="background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(247,147,30,0.2)); border: 2px solid var(--brand);">
+<div style="font-size: 3rem; margin-bottom: 16px;">🌡️</div>
+<div class="big">Hitzeprävention</div>
+<div class="desc">Echtzeit-Tools und Daten für deine Sicherheit bei Extremwettern</div>
+</div>
 </div>
 </div>
 </section>
 
-<hr class="my-5">
-
-<!-- Features Section -->
-<section class="features-section py-5">
-<h2 class="text-center mb-5">Unsere Dienste</h2>
+<!-- ===================== SERVICES ===================== -->
+<section class="mb-5">
+<h2 class="text-center mb-4"><i class="bi bi-tools"></i> Unsere Dienste</h2>
 <div class="row g-4">
-<!-- Feature 1 -->
-<div class="col-md-6 col-lg-4">
-<div class="card h-100 shadow-sm">
-<div class="card-body text-center">
+<!-- Trinkrechner -->
+<div class="col-lg-4 col-md-6">
+<div class="card service-card shadow-sm">
+<div class="card-body">
+<div class="service-icon"><i class="bi bi-droplet-fill"></i></div>
 <h5 class="card-title">Trinkrechner</h5>
-<p class="card-text">
-Berechnen Sie Ihre persönliche tägliche Flüssigkeitszufuhr basierend auf Ihrem Alter, Gewicht und Aktivitätslevel. Bleiben Sie richtig hydratisiert!
-</p>
-<a href="./trinkrechner.html" class="btn btn-primary btn-sm">Zum Rechner</a>
+<p class="card-text text-muted">Berechne deine persönliche tägliche Flüssigkeitszufuhr basierend auf Gewicht, Alter und Aktivitätslevel.</p>
+<a href="./trinkrechner.html" class="btn btn-brand"><i class="bi bi-calculator"></i> Zum Rechner</a>
 </div>
 </div>
 </div>
 
-<!-- Feature 2 -->
-<div class="col-md-6 col-lg-4">
-<div class="card h-100 shadow-sm">
-<div class="card-body text-center">
+<!-- Hitze Karte -->
+<div class="col-lg-4 col-md-6">
+<div class="card service-card shadow-sm">
+<div class="card-body">
+<div class="service-icon"><i class="bi bi-geo-alt-fill"></i></div>
 <h5 class="card-title">Hitze Karte</h5>
-<p class="card-text">
-Überblick über aktuelle Hitzegefahren in Ihrer Region. Sehen Sie Echtzeit-Daten zur Hitzebelastung und erhalten Sie wichtige Warnungen.
-</p>
-<a href="./heatmap.html" class="btn btn-primary btn-sm">Zur Karte</a>
+<p class="card-text text-muted">Überblick über aktuelle Hitzegefahren in deiner Region. Echtzeit-Daten zur Hitzebelastung und wichtige Warnungen.</p>
+<a href="./heatmap.html" class="btn btn-brand"><i class="bi bi-map"></i> Zur Karte</a>
 </div>
 </div>
 </div>
 
-<!-- Feature 3 -->
-<div class="col-md-6 col-lg-4">
-<div class="card h-100 shadow-sm">
-<div class="card-body text-center">
-<h5 class="card-title">Über uns</h5>
-<p class="card-text">
-Erfahren Sie mehr über unser Team, unsere Expertise und unsere Vision für eine sichere Zukunft in Zeiten des Klimawandels.
-</p>
-<a href="./about.html" class="btn btn-primary btn-sm">Erfahren Sie mehr</a>
+<!-- Hitzewarner -->
+<div class="col-lg-4 col-md-6">
+<div class="card service-card shadow-sm">
+<div class="card-body">
+<div class="service-icon"><i class="bi bi-bell-fill"></i></div>
+<h5 class="card-title">Hitzewarner</h5>
+<p class="card-text text-muted">Erhalte Benachrichtigungen und Warnungen vor extremer Hitze in deiner Nähe.</p>
+<a href="./hitzewarner.html" class="btn btn-brand"><i class="bi bi-clock-alarm"></i> Einrichten</a>
 </div>
 </div>
 </div>
 </div>
 </section>
 
-<hr class="my-5">
+<!-- ===================== TIPPS ===================== -->
+<section class="mb-5">
+<h2 class="text-center mb-4"><i class="bi bi-lightbulb"></i> Tipps zur Hitzeprävention</h2>
+<div class="tips-section">
+<div class="row g-3">
+<div class="col-md-6">
+<div class="tip-item fade-in">
+<h6><i class="bi bi-droplet"></i> Ausreichend trinken</h6>
+<p>Trinke regelmäßig Wasser, auch wenn du keinen Durst hast. Vermeide zu viel Alkohol und Koffein.</p>
+</div>
+</div>
 
-<section class="tips-section py-5 bg-light">
-<div class="container">
-<h2 class="text-center mb-5">Tipps zur Hitzeprävention</h2>
+<div class="col-md-6">
+<div class="tip-item fade-in" style="animation-delay: 0.1s;">
+<h6><i class="bi bi-snowflake"></i> Kühl bleiben</h6>
+<p>Halte dich in schattigen oder klimatisierten Bereichen auf. Nimm regelmäßig kühle Duschen oder Bäder.</p>
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="tip-item fade-in" style="animation-delay: 0.2s;">
+<h6><i class="bi bi-shop"></i> Richtig anziehen</h6>
+<p>Trage leichte, lockere Kleidung in hellen Farben. Vergiss nicht Sonnencreme und eine Sonnenbrille.</p>
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="tip-item fade-in" style="animation-delay: 0.3s;">
+<h6><i class="bi bi-person-hearts"></i> Auf andere achten</h6>
+<p>Überprüfe regelmäßig ältere Menschen, Kinder und vulnerable Personen in deiner Umgebung.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===================== INFO TILES ===================== -->
+<section class="mb-5">
+<h2 class="text-center mb-4"><i class="bi bi-info-circle"></i> Wichtige Informationen</h2>
 <div class="row g-4">
-<div class="col-md-6">
-<div class="alert alert-info" role="alert">
-<h5>Ausreichend trinken</h5>
-<p>Trinken Sie regelmäßig Wasser, auch wenn Sie keinen Durst haben. Vermeiden Sie zu viel Alkohol und Koffein.</p>
+<div class="col-md-3 col-sm-6">
+<div class="info-tile">
+<i class="bi bi-droplet-fill" style="font-size: 2rem; color: #0dcaf0;"></i>
+<div class="big">2-3 L</div>
+<div class="desc">Tägliche Flüssigkeitszufuhr</div>
 </div>
 </div>
-<div class="col-md-6">
-<div class="alert alert-info" role="alert">
-<h5>Kühl bleiben</h5>
-<p>Halten Sie sich in schattigen oder klimatisierten Bereichen auf. Nehmen Sie regelmäßig kühle Duschen oder Bäder.</p>
+
+<div class="col-md-3 col-sm-6">
+<div class="info-tile">
+<i class="bi bi-thermometer-high" style="font-size: 2rem; color: #dc3545;"></i>
+<div class="big">35°C+</div>
+<div class="desc">Hitzewarnstufe</div>
 </div>
 </div>
-<div class="col-md-6">
-<div class="alert alert-info" role="alert">
-<h5>Richtig anziehen</h5>
-<p>Tragen Sie leichte, lockere Kleidung in hellen Farben. Vergessen Sie nicht Sonnencreme und eine Sonnenbrille.</p>
+
+<div class="col-md-3 col-sm-6">
+<div class="info-tile">
+<i class="bi bi-clock-history" style="font-size: 2rem; color: #ffc107;"></i>
+<div class="big">15 min</div>
+<div class="desc">Trinkintervalle bei Sport</div>
 </div>
 </div>
-<div class="col-md-6">
-<div class="alert alert-info" role="alert">
-<h5>Auf andere achten</h5>
-<p>Überprüfen Sie regelmäßig ältere Menschen, Kinder und andere vulnerable Personen in Ihrer Umgebung.</p>
-</div>
+
+<div class="col-md-3 col-sm-6">
+<div class="info-tile">
+<i class="bi bi-heart-pulse" style="font-size: 2rem; color: #ff6b35;"></i>
+<div class="big">0-4 h</div>
+<div class="desc">Notfall-Risiko-Dauer</div>
 </div>
 </div>
 </div>
 </section>
 
-<hr class="my-5">
-
-<section class="cta-section py-5 text-center">
-<h2 class="mb-4">Bereit für den Sommer?</h2>
-<p class="lead mb-4">Nutzen Sie unsere kostenlosen Tools und erhalten Sie hilfreiche Tipps zur Hitzebewältigung.</p>
-<a href="./contact.html" class="btn btn-primary btn-lg">Fragen? Kontaktieren Sie uns</a>
+<!-- ===================== CTA ===================== -->
+<section class="mb-5">
+<div class="card glass shadow-sm border-0" style="padding: 3rem; text-align: center; background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(247,147,30,0.1));">
+<h3 class="mb-3">Bereit für den Sommer?</h3>
+<p class="mb-4 fs-5">Nutze unsere kostenlosen Tools und erhalte hilfreiche Tipps zur Hitzebewältigung.</p>
+<div class="d-flex gap-3 justify-content-center flex-wrap">
+<a href="./trinkrechner.html" class="btn btn-brand btn-lg"><i class="bi bi-calculator"></i> Trinkrechner nutzen</a>
+<a href="./heatmap.html" class="btn btn-outline-danger btn-lg"><i class="bi bi-map"></i> Hitze Karte öffnen</a>
+</div>
+</div>
 </section>
-</div>
+
 </div>
 
-<nav class="nav-foot mt-5 pt-5 border-top">
-<ul class="nav justify-content-center">
-<li class="nav-item">
-<a class="nav-link" aria-current="page" href="index.html">Home</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./heatmap.html">Hitze Karte</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./about.html">Über uns</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./contact.html">Kontakt</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/impressum.html">Impressum</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/agb.html">AGB</a>
-</li>
+<!-- ===================== FOOTER ===================== -->
+<nav class="nav-foot">
+<ul class="nav justify-content-center flex-wrap">
+<li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a></li>
+<li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+<li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+<li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/impressum.html">Impressum</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/agb.html">AGB</a></li>
 </ul>
 </nav>
-
-<footer class="text-center py-4 border-top bg-light">
-<p>&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
+<footer class="text-center">
+<p class="mb-0">&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<!-- Back to Top -->
+<button class="btn btn-brand rounded-circle shadow" id="toTop" title="Nach oben">
+<i class="bi bi-arrow-up"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ---------- Dark Mode ---------- */
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(mode) {
+if (mode === "dark") {
+document.body.classList.add("dark-mode");
+themeToggle.className = "bi bi-sun-fill fs-4 theme-toggle";
+} else {
+document.body.classList.remove("dark-mode");
+themeToggle.className = "bi bi-moon-stars-fill fs-4 theme-toggle";
+}
+}
+applyTheme(localStorage.getItem("theme") || "light");
+themeToggle.addEventListener("click", () => {
+const neu = document.body.classList.contains("dark-mode") ? "light" : "dark";
+localStorage.setItem("theme", neu);
+applyTheme(neu);
+});
+
+/* ---------- Live-Uhr ---------- */
+function tick() {
+document.getElementById("liveClock").innerHTML =
+'<i class="bi bi-clock"></i> ' + new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 10000);
+
+/* ---------- Back to Top ---------- */
+const toTop = document.getElementById("toTop");
+window.addEventListener("scroll", () => toTop.style.display = window.scrollY > 300 ? "block" : "none");
+toTop.onclick = () => window.scrollTo({top:0, behavior:"smooth"});
+</script>
 </body>
 </html>

@@ -1,267 +1,397 @@
 <!DOCTYPE html>
 <html lang="de">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <head>
-        <title>Über uns - The Heating Company</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-    </head>
-  
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Über uns | The Heating Company</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root {
+--transition: 0.3s ease;
+--brand: #ff6b35;
+--brand-dark: #e85a24;
+--glass-bg: rgba(255,255,255,0.7);
+--card-bg: #ffffff;
+}
+* { scroll-behavior: smooth; }
+body {
+transition: background-color var(--transition), color var(--transition);
+min-height: 100vh;
+background:
+radial-gradient(circle at 10% 10%, rgba(255,193,7,0.10), transparent 40%),
+radial-gradient(circle at 90% 20%, rgba(220,53,69,0.10), transparent 45%),
+#f7f8fa;
+font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- Dark Mode ---------- */
+body.dark-mode {
+--glass-bg: rgba(40,40,40,0.7);
+--card-bg: #2a2a2a;
+background:
+radial-gradient(circle at 10% 10%, rgba(255,193,7,0.06), transparent 40%),
+radial-gradient(circle at 90% 20%, rgba(220,53,69,0.08), transparent 45%),
+#161616;
+color: #e0e0e0;
+}
+body.dark-mode .card,
+body.dark-mode .form-control,
+body.dark-mode .list-group-item {
+background-color: var(--card-bg);
+color: #e0e0e0;
+border-color: #444;
+}
+body.dark-mode .navbar,
+body.dark-mode .bg-light,
+body.dark-mode .nav-foot { background-color: #1e1e1e !important; }
+body.dark-mode .nav-link,
+body.dark-mode .navbar-brand { color: #e0e0e0 !important; }
+body.dark-mode .text-muted { color: #9a9a9a !important; }
+body.dark-mode .info-tile { background: #242424; }
+
+/* ---------- Navbar ---------- */
+.navbar {
+backdrop-filter: blur(10px);
+box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+.navbar-brand img { transition: transform var(--transition); }
+.navbar-brand:hover img { transform: scale(1.05); }
+.nav-link { font-weight: 500; position: relative; }
+.nav-link.active::after {
+content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
+height: 3px; border-radius: 3px; background: var(--brand);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+background: linear-gradient(135deg, #ff6b35, #f7931e, #dc3545);
+color: #fff; border-radius: 24px; padding: 2.5rem;
+box-shadow: 0 12px 40px rgba(255,107,53,0.25);
+position: relative; overflow: hidden;
+}
+.hero::after {
+content: "\F2C3"; font-family: "bootstrap-icons";
+position: absolute; right: -20px; top: -30px;
+font-size: 12rem; opacity: 0.15;
+}
+.hero h1 { font-weight: 800; }
+
+/* ---------- Cards ---------- */
+.card {
+background: var(--card-bg);
+border: 1px solid rgba(0,0,0,0.06);
+border-radius: 18px;
+transition: transform var(--transition), box-shadow var(--transition);
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+.glass { background: var(--glass-bg); backdrop-filter: blur(8px); }
+
+.btn-brand {
+background: var(--brand); color: #fff; border: none; font-weight: 600;
+transition: all var(--transition);
+}
+.btn-brand:hover { background: var(--brand-dark); color: #fff; transform: translateY(-2px); }
+
+/* ---------- Info Tiles ---------- */
+.info-tile {
+background: #f1f3f5; border-radius: 14px; padding: 20px;
+text-align: center; height: 100%; transition: all var(--transition);
+}
+.info-tile:hover { background: #e9ecef; transform: scale(1.05); }
+.info-tile .big { font-size: 1.6rem; font-weight: 700; color: var(--brand); }
+.info-tile .lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; opacity: .7; }
+
+/* ---------- Team Cards ---------- */
+.team-card {
+text-align: center; padding: 24px; border-radius: 16px;
+background: var(--card-bg); transition: all var(--transition);
+}
+.team-card:hover { transform: translateY(-8px); box-shadow: 0 16px 48px rgba(255,107,53,0.2); }
+.team-avatar {
+width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), #f7931e);
+margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+font-size: 2.5rem; color: #fff;
+}
+.team-card h5 { font-weight: 700; }
+.team-card .role { color: var(--brand); font-weight: 600; font-size: 0.9rem; }
+
+/* ---------- Value Cards ---------- */
+.value-card {
+padding: 24px; border-left: 4px solid var(--brand);
+background: var(--glass-bg); border-radius: 12px;
+transition: all var(--transition);
+}
+.value-card:hover { border-left-width: 6px; transform: translateX(4px); }
+.value-card h6 { color: var(--brand); font-weight: 700; }
+
+/* ---------- Footer ---------- */
+.nav-foot { background: #fff; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.06); }
+footer { margin-top: 10px; padding: 20px; }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+.theme-toggle { cursor: pointer; transition: transform var(--transition); }
+.theme-toggle:hover { transform: rotate(20deg) scale(1.15); }
+
+/* ---------- Timeline ---------- */
+.timeline {
+position: relative; padding: 20px 0;
+}
+.timeline::before {
+content: ""; position: absolute; left: 40px; top: 0; bottom: 0;
+width: 3px; background: linear-gradient(to bottom, var(--brand), #f7931e);
+}
+.timeline-item {
+margin-bottom: 32px; margin-left: 120px;
+}
+.timeline-dot {
+position: absolute; left: 20px; top: 4px;
+width: 40px; height: 40px; border-radius: 50%;
+background: var(--brand); color: #fff;
+display: flex; align-items: center; justify-content: center;
+font-weight: 700;
+}
+.timeline-content {
+padding: 16px; background: var(--glass-bg); border-radius: 12px;
+}
+
+/* ---------- Badge ---------- */
+.badge-soft { background: rgba(255,107,53,.15); color: var(--brand); font-weight:600; }
+</style>
+</head>
+
 <body>
-<nav class="navbar navbar-expand-lg bg-light">
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar navbar-expand-lg bg-light sticky-top">
 <div class="container-fluid">
 <a class="navbar-brand" href="./index.html">
-<img src="./img/heatingcomp_logo.png" alt="Bootstrap" width="120" height="58">
+<img src="./img/heatingcomp_logo.png" alt="Logo" width="120" height="58">
 </a>
 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 <span class="navbar-toggler-icon"></span>
 </button>
 <div class="collapse navbar-collapse" id="navbarNav">
 <ul class="navbar-nav">
-<li class="nav-item">
-<a class="nav-link" href="./index.html">Home</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./trinkrechner.html">Trinkrechner</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./heatmap.html">Hitze Karte</a>
-</li>
-<li class="nav-item">
-<a class="nav-link active" aria-current="page" href="./about.html">Über uns</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./contact.html">Kontakt</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trinkrechner</a></li>
+<li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+<li class="nav-item"><a class="nav-link" href="./hitzewarner.html">Hitzewarner</a></li>
+<li class="nav-item"><a class="nav-link active" aria-current="page" href="./about.html">Über uns</a></li>
+<li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
 </ul>
+<div class="ms-auto d-flex align-items-center gap-3">
+<span class="small text-muted d-none d-lg-inline" id="liveClock"></span>
+<i class="bi bi-moon-stars-fill fs-4 theme-toggle" id="themeToggle" title="Dark Mode umschalten"></i>
+</div>
 </div>
 </div>
 </nav>
 
-<!-- Hero Section -->
-<div class="hero-section text-center py-5 bg-light">
-<h1 class="display-4 mb-4">Über uns</h1>
-<p class="lead">Unser Team dediziert sich dem Schutz vor Hitze</p>
+<div class="container my-4">
+
+<!-- ===================== HERO ===================== -->
+<div class="hero mb-5 fade-in">
+<h1 class="mb-2"><i class="bi bi-shield-heart"></i> Über The Heating Company</h1>
+<p class="mb-0 fs-5">Wir schützen Menschen vor extremer Hitze – mit praktischen Tools und umfassenden Informationen.</p>
 </div>
 
-<div class="in-content">
-<div class="container">
-
-<!-- Company Story -->
-<section class="story-section py-5">
-<h2>Unsere Geschichte</h2>
-<p>
-The Heating Company wurde 2026 gegründet mit einer klaren Mission: Die Bevölkerung vor extremer Hitze zu schützen. In einer Zeit, in der Hitzeperioden immer häufiger und intensiver werden, erkannten wir die Notwendigkeit für praktische, benutzerfreundliche Lösungen.
-</p>
-<p>
-Unser Unternehmen entstand aus dem Verständnis heraus, dass insbesondere vulnerable Bevölkerungsgruppen wie Kinder und ältere Menschen zusätzlicher Unterstützung bedürfen. Mit dieser Vision entwickelten wir innovative Tools und Informationen, um diese Gruppen zu schützen und zu unterstützen.
-</p>
-</section>
-
-<hr class="my-5">
-
-<!-- Mission Section -->
-<section class="mission-section py-5">
-<h2>Unsere Mission</h2>
-<p>
-Wir setzen uns dafür ein, Menschen vor den gesundheitlichen Risiken extremer Hitze zu bewahren. Durch unsere Tools wie den Trinkrechner und die Hitze Karte bieten wir praktische Unterstützung im Alltag. Besonderer Fokus liegt auf dem Schutz von Kindern und Senioren – den Gruppen, die am stärksten von Hitzebelastung gefährdet sind.
-</p>
-<p>
-Unser Ziel ist es, Informationen zugänglich zu machen, Bewusstsein zu schaffen und Menschen zu befähigen, richtige Entscheidungen in Hitzeperioden zu treffen.
-</p>
-</section>
-
-<hr class="my-5">
-
-<!-- Team Section -->
-<section class="team-section py-5">
-<h2 class="text-center mb-5">Unser Team</h2>
-<div class="row g-4">
-<!-- Team Member 1 -->
-<div class="col-md-6 col-lg-3">
-<div class="card h-100 shadow-sm text-center">
-<div class="card-body">
-<h5 class="card-title">Joshua</h5>
-<p class="card-text text-muted">Design</p>
-</div>
-</div>
-</div>
-
-<!-- Team Member 2 -->
-<div class="col-md-6 col-lg-3">
-<div class="card h-100 shadow-sm text-center">
-<div class="card-body">
-<h5 class="card-title">Hendrik</h5>
-<p class="card-text text-muted">Design, Visionär</p>
-</div>
-</div>
-</div>
-
-<!-- Team Member 3 -->
-<div class="col-md-6 col-lg-3">
-<div class="card h-100 shadow-sm text-center">
-<div class="card-body">
-<h5 class="card-title">Philipp</h5>
-<p class="card-text text-muted">Entwicklung</p>
-</div>
-</div>
-</div>
-
-<!-- Team Member 4 -->
-<div class="col-md-6 col-lg-3">
-<div class="card h-100 shadow-sm text-center">
-<div class="card-body">
-<h5 class="card-title">Lukas</h5>
-<p class="card-text text-muted">Entwicklung</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-
-<hr class="my-5">
-
-<!-- Values Section -->
-<section class="values-section py-5 bg-light">
-<div class="container">
-<h2 class="text-center mb-5">Unsere Werte</h2>
-<div class="row g-4">
-<div class="col-md-4">
-<div class="card h-100 text-center">
-<div class="card-body">
-<h5 class="card-title">Schutz</h5>
-<p class="card-text">
-Der Schutz der Gesundheit und des Wohlbefindens unserer Nutzer steht an erster Stelle.
-</p>
-</div>
-</div>
-</div>
-<div class="col-md-4">
-<div class="card h-100 text-center">
-<div class="card-body">
-<h5 class="card-title">Zugänglichkeit</h5>
-<p class="card-text">
-Unsere Tools und Informationen sollen für alle Menschen leicht zugänglich sein.
-</p>
-</div>
-</div>
-</div>
-<div class="col-md-4">
-<div class="card h-100 text-center">
-<div class="card-body">
-<h5 class="card-title">Innovation</h5>
-<p class="card-text">
-Wir entwickeln kontinuierlich neue Lösungen, um Menschen besser vor Hitze zu schützen.
-</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-
-<hr class="my-5">
-
-<!-- Focus Groups Section -->
-<section class="focus-section py-5">
-<h2 class="text-center mb-5">Besonderer Fokus</h2>
-<div class="row align-items-center">
+<!-- ===================== GESCHICHTE ===================== -->
+<div class="row g-4 mb-5">
 <div class="col-lg-6">
-<h4>Schutz von Kindern und Senioren</h4>
-<p>
-Kinder und ältere Menschen gehören zu den Bevölkerungsgruppen, die am meisten unter extremer Hitze leiden. Sie sind anfälliger für hitzebedingte Erkrankungen und benötigen zusätzliche Unterstützung.
-</p>
-<p>
-Unsere Tools sind speziell entwickelt worden, um diese vulnerablen Gruppen zu schützen:
-</p>
-<ul>
-<li><strong>Für Kinder:</strong> Altersgerechte Informationen zur Flüssigkeitszufuhr und Hitzeschutz</li>
-<li><strong>Für Senioren:</strong> Einfach zu bedienende Interfaces und verständliche Warnungen</li>
-<li><strong>Für Betreuer:</strong> Hilfsmittel zur Überwachung und zum Schutz ihrer Angehörigen</li>
-</ul>
+<div class="card p-4 shadow-sm">
+<h4 class="mb-3"><i class="bi bi-clock-history"></i> Unsere Geschichte</h4>
+<div class="timeline">
+<div class="timeline-item">
+<div class="timeline-dot">1</div>
+<div class="timeline-content">
+<h6>2026 – Gründung</h6>
+<p class="mb-0">The Heating Company wurde gegründet mit einer klaren Mission: Die Bevölkerung vor extremer Hitze zu schützen.</p>
 </div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot">2</div>
+<div class="timeline-content">
+<h6>Erkenntnis</h6>
+<p class="mb-0">In einer Zeit, in der Hitzeperioden immer häufiger und intensiver werden, erkannten wir die Notwendigkeit für praktische Lösungen.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot">3</div>
+<div class="timeline-content">
+<h6>Fokus auf Vulnerable</h6>
+<p class="mb-0">Wir erkannten: Besonders vulnerable Bevölkerungsgruppen wie Kinder und ältere Menschen benötigen zusätzliche Unterstützung.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-dot">4</div>
+<div class="timeline-content">
+<h6>Innovation & Tools</h6>
+<p class="mb-0">Mit dieser Vision entwickeln wir innovative Tools und Informationen zum Schutz und zur Unterstützung.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Mission & Werte -->
 <div class="col-lg-6">
-<div class="alert alert-warning" role="alert">
-<h5>Wichtig</h5>
-<p>
-Bei extremer Hitze sollten insbesondere Kinder und ältere Menschen extra Aufmerksamkeit erhalten. Achten Sie auf Zeichen von Hitzeerschöpfung wie Verwirrung, Schwäche oder schneller Herzschlag.
-</p>
+<div class="card p-4 shadow-sm mb-4">
+<h4 class="mb-3"><i class="bi bi-fire"></i> Unsere Mission</h4>
+<p>Wir setzen uns dafür ein, Menschen vor den gesundheitlichen Risiken extremer Hitze zu bewahren. Durch unsere Tools wie den <strong>Trinkrechner</strong> und die <strong>Hitze Karte</strong> bieten wir praktische Unterstützung im Alltag.</p>
+<p class="mb-0"><strong>Besonderer Fokus:</strong> Der Schutz von Kindern und Senioren – den Gruppen, die am stärksten von Hitzebelastung gefährdet sind.</p>
 </div>
-</div>
-</div>
-</section>
 
-<hr class="my-5">
+<div class="card p-4 shadow-sm">
+<h5 class="mb-3"><i class="bi bi-lightbulb"></i> Das Ziel</h5>
+<p class="mb-0">Informationen zugänglich machen, Bewusstsein schaffen und Menschen befähigen, richtige Entscheidungen in Hitzeperioden zu treffen.</p>
+</div>
+</div>
+</div>
 
-<!-- Tools Section -->
-<section class="tools-section py-5 bg-light">
-<div class="container">
-<h2 class="text-center mb-5">Unsere Tools im Einsatz</h2>
-<div class="row g-4">
+<!-- ===================== UNSERE WERTE ===================== -->
+<h2 class="mb-4 mt-5"><i class="bi bi-gem"></i> Unsere Werte</h2>
+<div class="row g-3 mb-5">
 <div class="col-md-6">
-<div class="card h-100">
-<div class="card-body">
-<h5 class="card-title">Trinkrechner</h5>
-<p class="card-text">
-Hilft Nutzern, ihre persönliche tägliche Flüssigkeitszufuhr zu berechnen. Besonders wichtig für Kinder und Senioren, die oft vergessen, genug zu trinken.
-</p>
-<a href="./trinkrechner.html" class="btn btn-primary btn-sm">Zum Tool</a>
-</p>
-</div>
+<div class="value-card">
+<h6><i class="bi bi-shield-check"></i> Schutz</h6>
+<p class="mb-0">Der Schutz der Gesundheit und des Wohlbefindens unserer Nutzer steht an erster Stelle. Wir treffen alle Entscheidungen mit diesem Gedanken.</p>
 </div>
 </div>
 <div class="col-md-6">
-<div class="card h-100">
-<div class="card-body">
-<h5 class="card-title">Hitze Karte</h5>
-<p class="card-text">
-Zeigt aktuelle Hitzegefahren in verschiedenen Regionen an. Ermöglicht es Menschen, informierte Entscheidungen zu treffen und ihre Familie zu schützen.
-</p>
-<a href="./heatmap.html" class="btn btn-primary btn-sm">Zur Karte</a>
-</p>
+<div class="value-card">
+<h6><i class="bi bi-universal-access"></i> Zugänglichkeit</h6>
+<p class="mb-0">Unsere Tools und Informationen sollen für alle Menschen leicht zugänglich sein – unabhängig von technischen Kenntnissen.</p>
+</div>
+</div>
+<div class="col-md-6">
+<div class="value-card">
+<h6><i class="bi bi-lightning"></i> Innovation</h6>
+<p class="mb-0">Wir entwickeln kontinuierlich neue Lösungen, um Menschen noch besser vor Hitze zu schützen.</p>
+</div>
+</div>
+<div class="col-md-6">
+<div class="value-card">
+<h6><i class="bi bi-heart"></i> Besonderer Fokus</h6>
+<p class="mb-0">Kinder und Senioren sind unsere Priorität – wir entwickeln spezielle Maßnahmen für diese verletzlichen Gruppen.</p>
 </div>
 </div>
 </div>
-</div>
-</section>
 
+<!-- ===================== TEAM ===================== -->
+<h2 class="mb-4"><i class="bi bi-people"></i> Unser Team</h2>
+<div class="row g-4 mb-5">
+<div class="col-md-6 col-lg-3">
+<div class="team-card fade-in">
+<div class="team-avatar"><i class="bi bi-palette-fill"></i></div>
+<h5>Joshua</h5>
+<p class="role">Design</p>
+<p class="small text-muted">Gestaltet intuitive Benutzeroberflächen, die Sicherheit vermitteln.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="team-card fade-in">
+<div class="team-avatar"><i class="bi bi-lightbulb-fill"></i></div>
+<h5>Hendrik</h5>
+<p class="role">Design, Visionär</p>
+<p class="small text-muted">Inspiriert das Team mit innovativen Ideen und Konzepten.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="team-card fade-in">
+<div class="team-avatar"><i class="bi bi-code-square"></i></div>
+<h5>Philipp</h5>
+<p class="role">Entwicklung</p>
+<p class="small text-muted">Bringt unsere Ideen technisch zum Leben.</p>
+</div>
+</div>
+<div class="col-md-6 col-lg-3">
+<div class="team-card fade-in">
+<div class="team-avatar"><i class="bi bi-gear-fill"></i></div>
+<h5>Lukas</h5>
+<p class="role">Entwicklung</p>
+<p class="small text-muted">Optimiert und erweitert unsere digitalen Tools.</p>
+</div>
 </div>
 </div>
 
-<!-- Footer -->
-<nav class="nav-foot mt-5 pt-5 border-top">
-<ul class="nav justify-content-center">
-<li class="nav-item">
-<a class="nav-link" aria-current="page" href="index.html">Home</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./heatmap.html">Hitze Karte</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./about.html">Über uns</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./contact.html">Kontakt</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/impressum.html">Impressum</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a>
-</li>
-<li class="nav-item">
-<a class="nav-link" href="./legal/agb.html">AGB</a>
-</li>
+<!-- ===================== INFO KACHELN ===================== -->
+<h2 class="mb-4"><i class="bi bi-tools"></i> Unsere Tools</h2>
+<div class="row g-4 mb-5">
+<div class="col-md-6">
+<div class="info-tile">
+<h5 class="mb-3"><i class="bi bi-droplet-fill" style="color: var(--brand); font-size: 2rem;"></i></h5>
+<h6>Trinkrechner</h6>
+<p class="small text-muted">Berechnet deinen persönlichen Wasserbedarf basierend auf Gewicht, Aktivität und Temperatur.</p>
+<a href="./trinkrechner.html" class="btn btn-sm btn-brand">Zum Tool</a>
+</div>
+</div>
+<div class="col-md-6">
+<div class="info-tile">
+<h5 class="mb-3"><i class="bi bi-map-fill" style="color: var(--brand); font-size: 2rem;"></i></h5>
+<h6>Hitze Karte</h6>
+<p class="small text-muted">Zeigt aktuelle Hitzegefahren in deiner Region an und hilft dir, informierte Entscheidungen zu treffen.</p>
+<a href="./heatmap.html" class="btn btn-sm btn-brand">Zur Karte</a>
+</div>
+</div>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<nav class="nav-foot mt-5">
+<ul class="nav justify-content-center flex-wrap">
+<li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a></li>
+<li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+<li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+<li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/impressum.html">Impressum</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a></li>
+<li class="nav-item"><a class="nav-link" href="./legal/agb.html">AGB</a></li>
 </ul>
 </nav>
-
-<footer class="text-center py-4 border-top bg-light">
-<p>&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
+<footer class="text-center">
+<p class="mb-0">&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<!-- Back to top -->
+<button class="btn btn-brand rounded-circle shadow" id="toTop" title="Nach oben"
+style="position:fixed;bottom:24px;right:24px;width:48px;height:48px;display:none;z-index:1000;">
+<i class="bi bi-arrow-up"></i>
+</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ---------- Dark Mode ---------- */
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(mode) {
+if (mode === "dark") {
+document.body.classList.add("dark-mode");
+themeToggle.className = "bi bi-sun-fill fs-4 theme-toggle";
+    } else {
+document.body.classList.remove("dark-mode");
+themeToggle.className = "bi bi-moon-stars-fill fs-4 theme-toggle";
+    }
+}
+applyTheme(localStorage.getItem("theme") || "light");
+themeToggle.addEventListener("click", () => {
+const neu = document.body.classList.contains("dark-mode") ? "light" : "dark";
+localStorage.setItem("theme", neu);
+applyTheme(neu);
+});
+
+/* ---------- Live-Uhr ---------- */
+function tick() {
+document.getElementById("liveClock").innerHTML =
+'<i class="bi bi-clock"></i> ' + new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 10000);
+
+/* ---------- Back to top ---------- */
+const toTop = document.getElementById("toTop");
+window.addEventListener("scroll", () => toTop.style.display = window.scrollY > 300 ? "block" : "none");
+toTop.onclick = () => window.scrollTo({top:0, behavior:"smooth"});
+</script>
 </body>
 </html>
