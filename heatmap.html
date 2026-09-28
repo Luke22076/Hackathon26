@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Cool-Map Köln & Frechen</title>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<!-- Leaflet CSS (für Kartenanzeige) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+  #map {
+    height: 600px;
+    width: 100%;
+    border: 2px solid #ccc;
+  }
+</style>
+</head>
+<body>
+
+<!-- Kopfbereich -->
+<nav class="navbar navbar-dark bg-primary mb-3">
+  <div class="container">
+    <span class="navbar-brand mb-0 h1">🧊 Cool-Map Köln & Frechen</span>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="row">
+    <!-- Linke Spalte: Karte -->
+    <div class="col-md-9">
+      <div id="map"></div>
+    </div>
+
+    <!-- Rechte Spalte: Legende + Bedienung -->
+    <div class="col-md-3">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Legende</h5>
+          <p>🌳 Park</p>
+          <p>⛪ Kirche (kühl innen)</p>
+          <p>📚 Bibliothek</p>
+          <p>🚰 Trinkbrunnen</p>
+          <p>📍 Dein Vorschlag</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Neuer Vorschlag</h5>
+          <p class="small">Klicke den Button, dann auf die Karte, um einen neuen Trinkbrunnen / Refill-Ort vorzuschlagen.</p>
+          <button id="btnVorschlag" class="btn btn-success w-100 mb-2">📍 Vorschlag setzen</button>
+          <button id="btnReset" class="btn btn-outline-danger w-100">Eigene Vorschläge löschen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quellenangaben -->
+  <footer class="mt-4 mb-4 text-muted small">
+    <hr>
+    <p><strong>Quellen / Kartendaten:</strong></p>
+    <ul>
+      <li>Kartendaten: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap-Mitwirkende</a> (ODbL-Lizenz)</li>
+      <li>Kartendarstellung: © <a href="https://carto.com/attributions" target="_blank">CARTO</a></li>
+      <li>Kartenbibliothek: <a href="https://leafletjs.com/" target="_blank">Leaflet.js</a></li>
+      <li>Design: <a href="https://getbootstrap.com/" target="_blank">Bootstrap</a></li>
+      <li>Offene Daten Köln (Trinkbrunnen, Grünflächen): <a href="https://www.offenedaten-koeln.de/" target="_blank">offenedaten-koeln.de</a></li>
+      <li>Stadt Frechen: <a href="https://www.frechen.de/" target="_blank">frechen.de</a></li>
+      <li>Koordinaten-Recherche/Prüfung: <a href="https://nominatim.openstreetmap.org/" target="_blank">Nominatim</a></li>
+    </ul>
+    <p>Hinweis: Die eingetragenen Orte sind reale Orte. Koordinaten bitte bei Bedarf selbst nochmal auf OpenStreetMap prüfen, da sie manuell recherchiert wurden.</p>
+  </footer>
+
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+  // ---------------------------------------------------
+  // 1) Karte erstellen (Startpunkt ungefähr zwischen Köln und Frechen)
+  // ---------------------------------------------------
+  var map = L.map('map').setView([50.93, 6.90], 11);
+
+  // Kartenkacheln laden - KEIN API-KEY NÖTIG!
+  // Nutzt CARTO-Server, basiert aber auf OpenStreetMap-Daten
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, © <a href="https://carto.com/attributions">CARTO</a>'
+  }).addTo(map);
+
+
+  // ---------------------------------------------------
+  // 2) Liste der echten Orte
+  //    -> Hier kannst du einfach neue Orte hinzufügen!
+  //    -> Einfach neue Zeile im gleichen Format ergänzen.
+  //    -> Koordinaten (lat, lng) findest du z.B. über
+  //       https://www.openstreetmap.org  (Rechtsklick -> "Wo bin ich?")
+  // ---------------------------------------------------
+  const orte = [
+
+    // ---- KÖLN: Parks ----
+    { name: "Stadtgarten Köln", kategorie: "park", lat: 50.9422, lng: 6.9339 },
+    { name: "Volksgarten Köln", kategorie: "park", lat: 50.9235, lng: 6.9505 },
+    { name: "Rheinpark Köln", kategorie: "park", lat: 50.9550, lng: 6.9760 },
+    { name: "Blücherpark Köln", kategorie: "park", lat: 50.9560, lng: 6.9440 },
+
+    // ---- KÖLN: Kirchen (kühle Innenräume) ----
+    { name: "Kölner Dom", kategorie: "kirche", lat: 50.9413, lng: 6.9583 },
+    { name: "Groß St. Martin", kategorie: "kirche", lat: 50.9384, lng: 6.9603 },
+    { name: "Basilika St. Gereon", kategorie: "kirche", lat: 50.9410, lng: 6.9481 },
+
+    // ---- KÖLN: Büchereien ----
+    { name: "Zentralbibliothek Köln", kategorie: "bibliothek", lat: 50.9364, lng: 6.9528 },
+
+    // ---- KÖLN: Trinkbrunnen (Beispiel - bitte über offenedaten-koeln.de prüfen/ergänzen) ----
+    { name: "Trinkbrunnen Neumarkt (Beispiel)", kategorie: "brunnen", lat: 50.9354, lng: 6.9430 },
+
+    // ---- FRECHEN ----
+    { name: "Schlosspark / Rathaus Frechen", kategorie: "park", lat: 50.9107, lng: 6.7975 },
+    { name: "Pfarrkirche St. Audomar Frechen", kategorie: "kirche", lat: 50.9105, lng: 6.8010 },
+    { name: "Stadtbücherei Frechen", kategorie: "bibliothek", lat: 50.9110, lng: 6.7995 }
+
+  ];
+
+
+  // ---------------------------------------------------
+  // 3) Icon je nach Kategorie auswählen (einfache Emoji-Icons)
+  // ---------------------------------------------------
+  function erstelleIcon(emoji) {
+    return L.divIcon({
+      html: '<div style="font-size:24px;">' + emoji + '</div>',
+      className: '', // wichtig, sonst stört Leaflet-Standardstyle
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+  }
+
+  function holeIcon(kategorie) {
+    if (kategorie === "park") return erstelleIcon("🌳");
+    if (kategorie === "kirche") return erstelleIcon("⛪");
+    if (kategorie === "bibliothek") return erstelleIcon("📚");
+    if (kategorie === "brunnen") return erstelleIcon("🚰");
+    if (kategorie === "vorschlag") return erstelleIcon("📍");
+    return erstelleIcon("❓");
+  }
+
+
+  // ---------------------------------------------------
+  // 4) Funktion, um einen Punkt auf der Karte anzuzeigen
+  // ---------------------------------------------------
+  function zeigePunkt(punkt) {
+    var marker = L.marker([punkt.lat, punkt.lng], { icon: holeIcon(punkt.kategorie) });
+    marker.bindPopup("<strong>" + punkt.name + "</strong>");
+    marker.addTo(map);
+  }
+
+  // Alle festen Orte anzeigen
+  orte.forEach(function (punkt) {
+    zeigePunkt(punkt);
+  });
+
+
+  // ---------------------------------------------------
+  // 5) Eigene Vorschläge (z.B. neuer Trinkbrunnen) setzen
+  // ---------------------------------------------------
+  let vorschlagModus = false;
+
+  document.getElementById("btnVorschlag").addEventListener("click", function () {
+    vorschlagModus = true;
+    alert("Klicke jetzt auf die Karte, um dort einen Vorschlag zu setzen.");
+  });
+
+  map.on("click", function (e) {
+    if (vorschlagModus) {
+      var name = prompt("Wie soll der Vorschlag heißen? (z.B. 'Trinkbrunnen Ringstraße')");
+      if (name) {
+        var neuerPunkt = {
+          name: name,
+          kategorie: "vorschlag",
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
+        };
+
+        zeigePunkt(neuerPunkt);
+
+        // In localStorage speichern, damit es beim Neuladen erhalten bleibt
+        var gespeichert = JSON.parse(localStorage.getItem("vorschlaege") || "[]");
+        gespeichert.push(neuerPunkt);
+        localStorage.setItem("vorschlaege", JSON.stringify(gespeichert));
+      }
+      vorschlagModus = false;
+    }
+  });
+
+  // Gespeicherte Vorschläge beim Laden der Seite wieder anzeigen
+  var gespeicherteVorschlaege = JSON.parse(localStorage.getItem("vorschlaege") || "[]");
+  gespeicherteVorschlaege.forEach(function (punkt) {
+    zeigePunkt(punkt);
+  });
+
+  // Button zum Löschen aller eigenen Vorschläge
+  document.getElementById("btnReset").addEventListener("click", function () {
+    if (confirm("Wirklich alle eigenen Vorschläge löschen?")) {
+      localStorage.removeItem("vorschlaege");
+      location.reload();
+    }
+  });
+
+</script>
+
+</body>
+</html>

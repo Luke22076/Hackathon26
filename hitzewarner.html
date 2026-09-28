@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hitze-Warner</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container mt-4">
+    <h1>Hitze-Warner</h1>
+    <p>Gib die Temperatur und dein Alter ein.</p>
+
+    <label>Temperatur in °C</label>
+    <input class="form-control mb-3" type="number" id="temperatur">
+
+    <label>Alter</label>
+    <input class="form-control mb-3" type="number" id="alter">
+
+    <button class="btn btn-primary" onclick="pruefen()">Prüfen</button>
+
+    <div class="alert mt-3 d-none" id="ergebnis"></div>
+
+    <small>
+      Dies ist nur eine einfache Einschätzung und keine amtliche Hitzewarnung.
+    </small>
+  </div>
+
+  <script>
+    function pruefen() {
+      let temperatur = Number(document.getElementById("temperatur").value);
+      let alter = Number(document.getElementById("alter").value);
+      let ergebnis = document.getElementById("ergebnis");
+      let stufe;
+      let tipp;
+      let farbe;
+
+      if (alter <= 0 || document.getElementById("temperatur").value == "") {
+        ergebnis.innerHTML = "Bitte alles ausfüllen.";
+        ergebnis.className = "alert alert-danger mt-3";
+        return;
+      }
+
+      if (temperatur < 25) {
+        stufe = "Keine Warnung";
+        farbe = "alert-success";
+        tipp = "Genieße den Tag und trinke regelmäßig.";
+      } else if (temperatur < 30) {
+        stufe = "Es ist warm";
+        farbe = "alert-warning";
+        tipp = "Trinke genug und mache Pausen im Schatten.";
+      } else if (temperatur < 35) {
+        stufe = "Hitzewarnung";
+        farbe = "alert-danger";
+        tipp = "Meide die Mittagssonne und nimm eine Flasche Wasser mit.";
+      } else {
+        stufe = "Extreme Hitze";
+        farbe = "alert-danger";
+        tipp = "Bleibe möglichst an einem kühlen Ort und vermeide Anstrengung.";
+      }
+
+      if (alter < 18 && temperatur >= 25) {
+        tipp = tipp + " Kinder sollten eine Kopfbedeckung tragen und oft Trinkpausen machen.";
+      }
+
+      if (alter >= 65 && temperatur >= 25) {
+        tipp = tipp + " Ältere Menschen sollten auch ohne Durst regelmäßig trinken und die Wohnung kühl halten.";
+      }
+
+      ergebnis.innerHTML = "<b>Warnstufe: " + stufe + "</b><br>" + tipp;
+      ergebnis.className = "alert " + farbe + " mt-3";
+    }
+  </script>
+</body>
+</html>
