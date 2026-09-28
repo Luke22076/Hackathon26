@@ -1,218 +1,1536 @@
-<!DOCTYPE html>
+```html
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Cool-Map Köln & Frechen</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KühlKompass – Köln & Umgebung</title>
 
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-
-<!-- Leaflet CSS (für Kartenanzeige) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-  #map {
-    height: 600px;
-    width: 100%;
-    border: 2px solid #ccc;
+:root {
+  --p:#087f8c;
+  --d:#075985;
+  --ink:#173548;
+  --mut:#667d89;
+  --line:#d7e7e9;
+  --card:#fff;
+  --bg:#effafa;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  min-height:100vh;
+  color:var(--ink);
+  background:linear-gradient(145deg,var(--bg),#fff9e8);
+  font:15px/1.45 system-ui,sans-serif;
+}
+
+button,
+input,
+select {
+  font:inherit;
+}
+
+button {
+  cursor:pointer;
+}
+
+.wrap {
+  width:min(1400px,calc(100% - 28px));
+  margin:auto;
+}
+
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 0;
+}
+
+.brand {
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.logo {
+  padding:10px;
+  border-radius:15px;
+  background:linear-gradient(135deg,#22c1c3,var(--p));
+  font-size:25px;
+}
+
+.brand h1 {
+  margin:0;
+  font-size:1.55rem;
+}
+
+.brand small,
+.muted {
+  color:var(--mut);
+}
+
+.theme,
+.chip,
+.city {
+  padding:8px 12px;
+  color:var(--ink);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:999px;
+}
+
+.hero {
+  display:grid;
+  grid-template-columns:1.4fr .6fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.intro,
+.weather,
+.panel,
+.mapbox {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:0 12px 35px #17475b18;
+}
+
+.intro {
+  padding:25px;
+  color:#fff;
+  background:linear-gradient(120deg,var(--d),var(--p));
+}
+
+.intro h2 {
+  margin:4px 0 8px;
+  font-size:clamp(1.45rem,4vw,2.35rem);
+  line-height:1.12;
+}
+
+.intro p {
+  margin:0;
+  opacity:.9;
+}
+
+.weather {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  padding:20px;
+}
+
+.weather b {
+  display:block;
+  font-size:1.5rem;
+}
+
+.weather span {
+  display:block;
+}
+
+.warning {
+  display:none;
+  padding:13px 17px;
+  margin-bottom:16px;
+  color:#934600;
+  background:#fff3df;
+  border:1px solid #f7b85a;
+  border-radius:14px;
+}
+
+.warning.show {
+  display:block;
+}
+
+.panel {
+  padding:16px;
+  margin-bottom:16px;
+}
+
+.search {
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:9px;
+}
+
+.search input {
+  height:46px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+
+.btn {
+  padding:0 16px;
+  color:#fff;
+  background:var(--p);
+  border:0;
+  border-radius:12px;
+  font-weight:700;
+}
+
+.btn.alt {
+  color:var(--d);
+  background:#e8f7f6;
+  border:1px solid #c5e7e5;
+}
+
+.btn:disabled {
+  opacity:.55;
+}
+
+.quick,
+.filters {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  align-items:center;
+  margin-top:12px;
+}
+
+.filters {
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+
+.chip.active {
+  color:#075f58;
+  background:#d9f5f1;
+  border-color:#55bfb6;
+}
+
+.filters select {
+  padding:8px;
+  margin-left:auto;
+  color:var(--ink);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+
+.layout {
+  display:grid;
+  grid-template-columns:1fr 345px;
+  gap:16px;
+  align-items:start;
+}
+
+.mapbox {
+  position:relative;
+  padding:7px;
+}
+
+#map {
+  height:650px;
+  background:#dcebed;
+  border-radius:15px;
+}
+
+.status {
+  position:absolute;
+  z-index:600;
+  bottom:20px;
+  left:20px;
+  display:none;
+  max-width:calc(100% - 40px);
+  padding:9px 13px;
+  color:white;
+  background:#102f3eea;
+  border-radius:10px;
+}
+
+.status.show {
+  display:block;
+}
+
+aside {
+  display:grid;
+  gap:13px;
+}
+
+.panel h3 {
+  margin:0 0 8px;
+}
+
+.head {
+  display:flex;
+  justify-content:space-between;
+}
+
+.count,
+.price {
+  padding:3px 7px;
+  color:var(--d);
+  background:#e8f7f6;
+  border-radius:8px;
+  font-size:.74rem;
+  font-weight:700;
+}
+
+.list {
+  display:grid;
+  gap:7px;
+  max-height:340px;
+  overflow:auto;
+}
+
+.place {
+  display:grid;
+  grid-template-columns:29px 1fr auto;
+  gap:8px;
+  align-items:center;
+  padding:10px;
+  color:var(--ink);
+  text-align:left;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+
+.place:hover {
+  border-color:var(--p);
+}
+
+.place b,
+.place small {
+  display:block;
+}
+
+.place small {
+  color:var(--mut);
+}
+
+.paid {
+  color:#975500;
+  background:#fff0d8;
+}
+
+.tips {
+  padding-left:20px;
+  margin-bottom:0;
+}
+
+.tips li {
+  margin:7px 0;
+}
+
+.hydrate {
+  display:flex;
+  gap:7px;
+}
+
+.hydrate select {
+  min-width:0;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+
+.hydrate .btn {
+  padding:9px 12px;
+}
+
+footer {
+  padding:25px;
+  color:var(--mut);
+  text-align:center;
+  font-size:.78rem;
+}
+
+.pin {
+  padding:4px;
+  background:white;
+  border:2px solid var(--c);
+  border-radius:50% 50% 50% 8px;
+  box-shadow:0 3px 8px #1235;
+  font-size:21px;
+  transform:rotate(-45deg);
+}
+
+.pin span {
+  display:block;
+  transform:rotate(45deg);
+}
+
+.dark {
+  --ink:#e5f2f4;
+  --mut:#a9bec6;
+  --line:#2c4b55;
+  --card:#112d38;
+  --bg:#081d25;
+}
+
+.dark .intro {
+  background:linear-gradient(120deg,#064d69,#087f8c);
+}
+
+.dark .btn.alt,
+.dark .chip.active {
+  color:#d8ffff;
+  background:#17444c;
+}
+
+.dark .paid {
+  color:#ffe1ad;
+  background:#57401f;
+}
+
+@media (max-width:950px) {
+  .layout {
+    grid-template-columns:1fr;
   }
+
+  .hero {
+    grid-template-columns:1fr;
+  }
+
+  aside {
+    grid-template-columns:1fr 1fr;
+  }
+
+  .results {
+    grid-column:1/-1;
+  }
+
+  #map {
+    height:540px;
+  }
+}
+
+@media (max-width:650px) {
+  .search {
+    grid-template-columns:1fr 1fr;
+  }
+
+  .search input {
+    grid-column:1/-1;
+  }
+
+  .layout,
+  aside {
+    grid-template-columns:1fr;
+  }
+
+  .results {
+    grid-column:auto;
+  }
+
+  .filters select {
+    width:100%;
+    margin-left:0;
+  }
+
+  #map {
+    height:55vh;
+    min-height:410px;
+  }
+
+  .theme {
+    font-size:0;
+  }
+
+  .theme span {
+    font-size:18px;
+  }
+}
 </style>
 </head>
+
 <body>
 
-<!-- Kopfbereich -->
-<nav class="navbar navbar-dark bg-primary mb-3">
-  <div class="container">
-    <span class="navbar-brand mb-0 h1">🧊 Cool-Map Köln & Frechen</span>
+<header class="wrap">
+  <div class="brand">
+    <div class="logo">❄️</div>
+
+    <div>
+      <h1>KühlKompass</h1>
+      <small>Köln, Frechen & direkte Umgebung</small>
+    </div>
   </div>
-</nav>
 
-<div class="container">
+  <button class="theme" id="theme" type="button">
+    <span>🌙</span> Dunkel
+  </button>
+</header>
 
-  <div class="row">
-    <!-- Linke Spalte: Karte -->
-    <div class="col-md-9">
+<main class="wrap">
+  <section class="hero">
+    <div class="intro">
+      <small>SICHER DURCH HEISSE TAGE</small>
+
+      <h2>
+        Schatten, Wasser und kühle Innenräume in deiner Nähe.
+      </h2>
+
+      <p>
+        Live-Daten werden nur im 4,5-km-Umkreis des gesuchten
+        Orts geladen – gezielt und serverfreundlich.
+      </p>
+    </div>
+
+    <div class="weather">
+      <b style="font-size:2.3rem">🌤️</b>
+
+      <div>
+        <b id="temp">Wetter laden …</b>
+        <span id="feel">Köln</span>
+        <small class="muted" id="details"></small>
+      </div>
+    </div>
+  </section>
+
+  <div class="warning" id="warning">
+    ⚠️ <b>Hitzebelastung:</b>
+    <span id="warningText"></span>
+  </div>
+
+  <section class="panel">
+    <form class="search" id="form">
+      <input
+        id="query"
+        placeholder="Ort oder Adresse, z. B. Frechen Rathaus"
+        aria-label="Ort"
+      >
+
+      <button class="btn" id="search" type="submit">
+        Live suchen
+      </button>
+
+      <button class="btn alt" type="button" id="locate">
+        ◎ Standort
+      </button>
+    </form>
+
+    <div class="quick">
+      <small class="muted">Schnellauswahl:</small>
+
+      <button class="city" type="button">Köln</button>
+      <button class="city" type="button">Frechen</button>
+      <button class="city" type="button">Hürth</button>
+      <button class="city" type="button">Brühl</button>
+      <button class="city" type="button">Pulheim</button>
+      <button class="city" type="button">Leverkusen</button>
+      <button class="city" type="button">Bergisch Gladbach</button>
+    </div>
+
+    <div class="filters" id="filters">
+      <small class="muted">ANZEIGEN</small>
+
+      <button class="chip active" data-c="park" type="button">
+        🌳 Parks
+      </button>
+
+      <button class="chip active" data-c="water" type="button">
+        🚰 Trinkwasser
+      </button>
+
+      <button class="chip active" data-c="pool" type="button">
+        🏊 Bäder
+      </button>
+
+      <button class="chip active" data-c="library" type="button">
+        📚 Bibliotheken
+      </button>
+
+      <button class="chip active" data-c="church" type="button">
+        ⛪ Kirchen
+      </button>
+
+      <button class="chip active" data-c="museum" type="button">
+        🏛️ Museen
+      </button>
+
+      <button class="chip active" data-c="cafe" type="button">
+        🥤 Cafés
+      </button>
+
+      <select id="price" aria-label="Kostenfilter">
+        <option value="all">Alle Kosten</option>
+        <option value="free">Nur kostenlos</option>
+        <option value="paid">Nur kostenpflichtig</option>
+      </select>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="mapbox">
       <div id="map"></div>
-    </div>
+      <div class="status" id="status"></div>
+    </section>
 
-    <!-- Rechte Spalte: Legende + Bedienung -->
-    <div class="col-md-3">
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">Legende</h5>
-          <p>🌳 Park</p>
-          <p>⛪ Kirche (kühl innen)</p>
-          <p>📚 Bibliothek</p>
-          <p>🚰 Trinkbrunnen</p>
-          <p>📍 Dein Vorschlag</p>
+    <aside>
+      <section class="panel results">
+        <div class="head">
+          <h3>Orte in deiner Nähe</h3>
+          <span class="count" id="count"></span>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Neuer Vorschlag</h5>
-          <p class="small">Klicke den Button, dann auf die Karte, um einen neuen Trinkbrunnen / Refill-Ort vorzuschlagen.</p>
-          <button id="btnVorschlag" class="btn btn-success w-100 mb-2">📍 Vorschlag setzen</button>
-          <button id="btnReset" class="btn btn-outline-danger w-100">Eigene Vorschläge löschen</button>
+        <div class="list" id="list"></div>
+      </section>
+
+      <section class="panel">
+        <h3>💧 Trink-Erinnerung</h3>
+
+        <p class="muted">
+          Erinnert nur, solange diese Seite geöffnet ist.
+        </p>
+
+        <div class="hydrate">
+          <select id="minutes">
+            <option value="30">30 Minuten</option>
+            <option value="45">45 Minuten</option>
+            <option value="60" selected>1 Stunde</option>
+          </select>
+
+          <button class="btn alt" id="remind" type="button">
+            Starten
+          </button>
         </div>
-      </div>
-    </div>
+
+        <small class="muted" id="remindState">
+          Nicht aktiv.
+        </small>
+      </section>
+
+      <section class="panel">
+        <h3>Hitzeschutz kompakt</h3>
+
+        <ul class="tips">
+          <li>11–18 Uhr direkte Sonne meiden.</li>
+          <li>Trinken, bevor Durst entsteht.</li>
+          <li>Morgens lüften, danach abdunkeln.</li>
+          <li>
+            Verwirrtheit oder Bewusstlosigkeit:
+            <b>112</b>.
+          </li>
+        </ul>
+      </section>
+    </aside>
   </div>
+</main>
 
-  <!-- Quellenangaben -->
-  <footer class="mt-4 mb-4 text-muted small">
-    <hr>
-    <p><strong>Quellen / Kartendaten:</strong></p>
-    <ul>
-      <li>Kartendaten: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap-Mitwirkende</a> (ODbL-Lizenz)</li>
-      <li>Kartendarstellung: © <a href="https://carto.com/attributions" target="_blank">CARTO</a></li>
-      <li>Kartenbibliothek: <a href="https://leafletjs.com/" target="_blank">Leaflet.js</a></li>
-      <li>Design: <a href="https://getbootstrap.com/" target="_blank">Bootstrap</a></li>
-      <li>Offene Daten Köln (Trinkbrunnen, Grünflächen): <a href="https://www.offenedaten-koeln.de/" target="_blank">offenedaten-koeln.de</a></li>
-      <li>Stadt Frechen: <a href="https://www.frechen.de/" target="_blank">frechen.de</a></li>
-      <li>Koordinaten-Recherche/Prüfung: <a href="https://nominatim.openstreetmap.org/" target="_blank">Nominatim</a></li>
-    </ul>
-    <p>Hinweis: Die eingetragenen Orte sind reale Orte. Koordinaten bitte bei Bedarf selbst nochmal auf OpenStreetMap prüfen, da sie manuell recherchiert wurden.</p>
-  </footer>
+<footer>
+  Karte: © Esri ·
+  Ortsdaten: © OpenStreetMap-Mitwirkende ·
+  Wetter: Open-Meteo ·
+  Öffnungszeiten, Zugang und Preise bitte vor Ort prüfen.
+</footer>
 
-</div>
-
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+const $ = id => document.getElementById(id);
 
-  // ---------------------------------------------------
-  // 1) Karte erstellen (Startpunkt ungefähr zwischen Köln und Frechen)
-  // ---------------------------------------------------
-  var map = L.map('map').setView([50.93, 6.90], 11);
+const center = {
+  lat: 50.936,
+  lng: 6.88
+};
 
-  // Kartenkacheln laden - KEIN API-KEY NÖTIG!
-  // Nutzt CARTO-Server, basiert aber auf OpenStreetMap-Daten
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+const categories = {
+  park: ["Park / Grünanlage", "🌳", "#16803a"],
+  water: ["Trinkwasser / Refill", "🚰", "#0284c7"],
+  pool: ["Bad / Wasser", "🏊", "#2563eb"],
+  library: ["Bibliothek", "📚", "#7c3aed"],
+  church: ["Kirche", "⛪", "#9333ea"],
+  museum: ["Museum", "🏛️", "#b45309"],
+  cafe: ["Café / Eisdiele", "🥤", "#be185d"]
+};
+
+const standardPlaces = [
+  ["Stadtgarten Köln", "park", 50.9422, 6.9339, "free"],
+  ["Volksgarten Köln", "park", 50.9235, 6.9505, "free"],
+  ["Rheinpark Köln", "park", 50.955, 6.976, "free"],
+  ["Forstbotanischer Garten", "park", 50.8827, 7.0006, "free"],
+  ["Decksteiner Weiher", "park", 50.9061, 6.8955, "free"],
+  ["Stadtwald Köln", "park", 50.9306, 6.9004, "free"],
+  ["Stadtpark Frechen", "park", 50.9126, 6.8075, "free"],
+  ["Brühler Schlosspark", "park", 50.8284, 6.9095, "free"],
+
+  ["Zentralbibliothek Köln", "library", 50.9363, 6.9527, "free"],
+  ["Stadtbücherei Frechen", "library", 50.9108, 6.81, "free"],
+  ["Stadtbücherei Hürth", "library", 50.8771, 6.8768, "free"],
+
+  ["Kölner Dom", "church", 50.9413, 6.9583, "free"],
+  ["St. Audomar Frechen", "church", 50.9105, 6.801, "free"],
+
+  ["Lentpark", "pool", 50.9554, 6.9634, "paid"],
+  ["Stadionbad Köln", "pool", 50.9362, 6.8752, "paid"],
+  ["Agrippabad", "pool", 50.933, 6.9513, "paid"],
+  ["Terrassenfreibad Frechen", "pool", 50.9062, 6.8085, "paid"],
+  ["De Bütt Hürth", "pool", 50.8829, 6.8707, "paid"],
+  ["KarlsBad Brühl", "pool", 50.8317, 6.897, "paid"],
+
+  ["Museum Ludwig", "museum", 50.9409, 6.9603, "paid"],
+  ["Wallraf-Richartz-Museum", "museum", 50.9383, 6.9582, "paid"],
+  ["Keramion Frechen", "museum", 50.9185, 6.8235, "paid"]
+];
+
+let places = standardPlaces.map((place, index) => ({
+  id: "d" + index,
+  name: place[0],
+  category: place[1],
+  lat: place[2],
+  lng: place[3],
+  price: place[4]
+}));
+
+let focus = center;
+let activeCategories = new Set(Object.keys(categories));
+let markers = new Map();
+let searchCircle;
+let userMarker;
+let reminderTimer;
+let statusTimer;
+
+/*
+ * Kartendarstellung mit Esri.
+ * Dadurch werden keine direkten OpenStreetMap-Kacheln mehr geladen.
+ */
+const map = L.map("map").setView(
+  [center.lat, center.lng],
+  11
+);
+
+const markerLayer = L.layerGroup().addTo(map);
+
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/" +
+  "World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  {
     maxZoom: 19,
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, © <a href="https://carto.com/attributions">CARTO</a>'
-  }).addTo(map);
+    attribution:
+      "Tiles © Esri · Daten © OpenStreetMap-Mitwirkende"
+  }
+).addTo(map);
 
+function distance(firstPoint, secondPoint) {
+  const earthRadius = 6371;
 
-  // ---------------------------------------------------
-  // 2) Liste der echten Orte
-  //    -> Hier kannst du einfach neue Orte hinzufügen!
-  //    -> Einfach neue Zeile im gleichen Format ergänzen.
-  //    -> Koordinaten (lat, lng) findest du z.B. über
-  //       https://www.openstreetmap.org  (Rechtsklick -> "Wo bin ich?")
-  // ---------------------------------------------------
-  const orte = [
+  const latitudeDistance =
+    (secondPoint.lat - firstPoint.lat) *
+    Math.PI / 180;
 
-    // ---- KÖLN: Parks ----
-    { name: "Stadtgarten Köln", kategorie: "park", lat: 50.9422, lng: 6.9339 },
-    { name: "Volksgarten Köln", kategorie: "park", lat: 50.9235, lng: 6.9505 },
-    { name: "Rheinpark Köln", kategorie: "park", lat: 50.9550, lng: 6.9760 },
-    { name: "Blücherpark Köln", kategorie: "park", lat: 50.9560, lng: 6.9440 },
+  const longitudeDistance =
+    (secondPoint.lng - firstPoint.lng) *
+    Math.PI / 180;
 
-    // ---- KÖLN: Kirchen (kühle Innenräume) ----
-    { name: "Kölner Dom", kategorie: "kirche", lat: 50.9413, lng: 6.9583 },
-    { name: "Groß St. Martin", kategorie: "kirche", lat: 50.9384, lng: 6.9603 },
-    { name: "Basilika St. Gereon", kategorie: "kirche", lat: 50.9410, lng: 6.9481 },
+  const calculation =
+    Math.sin(latitudeDistance / 2) ** 2 +
+    Math.cos(firstPoint.lat * Math.PI / 180) *
+    Math.cos(secondPoint.lat * Math.PI / 180) *
+    Math.sin(longitudeDistance / 2) ** 2;
 
-    // ---- KÖLN: Büchereien ----
-    { name: "Zentralbibliothek Köln", kategorie: "bibliothek", lat: 50.9364, lng: 6.9528 },
+  return 2 * earthRadius *
+    Math.asin(Math.sqrt(calculation));
+}
 
-    // ---- KÖLN: Trinkbrunnen (Beispiel - bitte über offenedaten-koeln.de prüfen/ergänzen) ----
-    { name: "Trinkbrunnen Neumarkt (Beispiel)", kategorie: "brunnen", lat: 50.9354, lng: 6.9430 },
+function escapeHtml(value) {
+  return String(value).replace(
+    /[&<>"']/g,
+    character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[character]
+  );
+}
 
-    // ---- FRECHEN ----
-    { name: "Schlosspark / Rathaus Frechen", kategorie: "park", lat: 50.9107, lng: 6.7975 },
-    { name: "Pfarrkirche St. Audomar Frechen", kategorie: "kirche", lat: 50.9105, lng: 6.8010 },
-    { name: "Stadtbücherei Frechen", kategorie: "bibliothek", lat: 50.9110, lng: 6.7995 }
+function priceLabel(price) {
+  if (price === "free") {
+    return "gratis";
+  }
 
+  if (price === "paid") {
+    return "kostet";
+  }
+
+  return "offen";
+}
+
+function renderPlaces() {
+  markerLayer.clearLayers();
+  markers.clear();
+
+  const priceFilter = $("price").value;
+
+  const filteredPlaces = places
+    .filter(place => {
+      const categoryMatches =
+        activeCategories.has(place.category);
+
+      const priceMatches =
+        priceFilter === "all" ||
+        place.price === priceFilter;
+
+      return categoryMatches && priceMatches;
+    })
+    .sort((firstPlace, secondPlace) => {
+      return (
+        distance(focus, firstPlace) -
+        distance(focus, secondPlace)
+      );
+    });
+
+  filteredPlaces.forEach(place => {
+    const category = categories[place.category];
+
+    const icon = L.divIcon({
+      className: "",
+      html: `
+        <div
+          class="pin"
+          style="--c:${category[2]}"
+        >
+          <span>${category[1]}</span>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 31]
+    });
+
+    const routeUrl =
+      "https://www.openstreetmap.org/directions" +
+      "?route=" +
+      focus.lat + "," + focus.lng +
+      ";" +
+      place.lat + "," + place.lng;
+
+    const marker = L.marker(
+      [place.lat, place.lng],
+      { icon }
+    );
+
+    marker.bindPopup(`
+      <b>${escapeHtml(place.name)}</b><br>
+      ${category[0]} · ${priceLabel(place.price)}<br>
+      ${distance(focus, place).toFixed(1)} km<br>
+      <a
+        target="_blank"
+        rel="noopener"
+        href="${routeUrl}"
+      >
+        Route öffnen
+      </a>
+    `);
+
+    marker.addTo(markerLayer);
+    markers.set(place.id, marker);
+  });
+
+  const nearbyPlaces = filteredPlaces
+    .filter(place => distance(focus, place) < 12)
+    .slice(0, 25);
+
+  $("count").textContent =
+    filteredPlaces.length + " Orte";
+
+  if (nearbyPlaces.length === 0) {
+    $("list").innerHTML = `
+      <p class="muted">
+        Keine Orte für diesen Filter.
+      </p>
+    `;
+  } else {
+    $("list").innerHTML = nearbyPlaces
+      .map(place => {
+        const category = categories[place.category];
+
+        return `
+          <button
+            class="place"
+            type="button"
+            data-id="${place.id}"
+          >
+            <span>${category[1]}</span>
+
+            <span>
+              <b>${escapeHtml(place.name)}</b>
+              <small>
+                ${distance(focus, place).toFixed(1)} km ·
+                ${category[0]}
+              </small>
+            </span>
+
+            <span class="price ${place.price}">
+              ${priceLabel(place.price)}
+            </span>
+          </button>
+        `;
+      })
+      .join("");
+  }
+
+  document
+    .querySelectorAll(".place")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        const marker = markers.get(
+          button.dataset.id
+        );
+
+        if (!marker) {
+          return;
+        }
+
+        map.setView(marker.getLatLng(), 16);
+        marker.openPopup();
+      });
+    });
+}
+
+function showStatus(message, persistent = false) {
+  clearTimeout(statusTimer);
+
+  $("status").textContent = message;
+  $("status").classList.add("show");
+
+  if (!persistent) {
+    statusTimer = setTimeout(() => {
+      $("status").classList.remove("show");
+    }, 5000);
+  }
+}
+
+function isInsideSupportedRegion(latitude, longitude) {
+  return (
+    latitude > 50.72 &&
+    latitude < 51.15 &&
+    longitude > 6.65 &&
+    longitude < 7.25
+  );
+}
+
+async function request(
+  url,
+  options = {},
+  timeout = 18000
+) {
+  const controller = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function setFocus(latitude, longitude, label) {
+  focus = {
+    lat: Number(latitude),
+    lng: Number(longitude)
+  };
+
+  map.setView(
+    [focus.lat, focus.lng],
+    14
+  );
+
+  if (searchCircle) {
+    map.removeLayer(searchCircle);
+  }
+
+  searchCircle = L.circle(
+    [focus.lat, focus.lng],
+    {
+      radius: 4500,
+      color: "#087f8c",
+      weight: 1,
+      fillOpacity: .03,
+      dashArray: "6 6"
+    }
+  ).addTo(map);
+
+  renderPlaces();
+  loadWeather(focus.lat, focus.lng, label);
+}
+
+function classifyPlace(tags) {
+  if (
+    tags.amenity === "drinking_water" ||
+    tags.drinking_water === "yes" ||
+    tags.refill === "yes"
+  ) {
+    return "water";
+  }
+
+  if (
+    tags.leisure === "park" ||
+    tags.leisure === "garden"
+  ) {
+    return "park";
+  }
+
+  if (
+    tags.leisure === "swimming_pool" ||
+    tags.leisure === "water_park" ||
+    tags.natural === "water"
+  ) {
+    return "pool";
+  }
+
+  if (tags.amenity === "library") {
+    return "library";
+  }
+
+  if (tags.amenity === "place_of_worship") {
+    return "church";
+  }
+
+  if (tags.tourism === "museum") {
+    return "museum";
+  }
+
+  if (tags.amenity === "cafe") {
+    return "cafe";
+  }
+
+  return null;
+}
+
+function detectPrice(category, tags) {
+  if (
+    tags.fee === "yes" ||
+    tags.charge ||
+    ["pool", "museum", "cafe"].includes(category)
+  ) {
+    return "paid";
+  }
+
+  if (
+    tags.fee === "no" ||
+    ["park", "water", "library", "church"]
+      .includes(category)
+  ) {
+    return "free";
+  }
+
+  return "unknown";
+}
+
+function createOverpassQuery(latitude, longitude) {
+  return `
+    [out:json][timeout:18];
+    (
+      nwr(around:4500,${latitude},${longitude})
+        ["amenity"~"^(drinking_water|library|place_of_worship|cafe)$"];
+
+      nwr(around:4500,${latitude},${longitude})
+        ["drinking_water"="yes"];
+
+      nwr(around:4500,${latitude},${longitude})
+        ["refill"="yes"];
+
+      nwr(around:4500,${latitude},${longitude})
+        ["leisure"~"^(park|garden|swimming_pool|water_park)$"];
+
+      nwr(around:4500,${latitude},${longitude})
+        ["tourism"="museum"];
+    );
+    out center 260;
+  `;
+}
+
+async function loadLivePlaces(latitude, longitude) {
+  const cacheKey =
+    "cool-" +
+    Number(latitude).toFixed(2) +
+    "-" +
+    Number(longitude).toFixed(2);
+
+  const cachedValue = localStorage.getItem(cacheKey);
+
+  if (cachedValue) {
+    try {
+      const cache = JSON.parse(cachedValue);
+
+      const cacheIsValid =
+        Date.now() - cache.time <
+        6 * 60 * 60 * 1000;
+
+      if (cacheIsValid) {
+        mergeLivePlaces(cache.data);
+
+        showStatus(
+          cache.data.length +
+          " Live-Orte aus dem Zwischenspeicher geladen."
+        );
+
+        return;
+      }
+    } catch (error) {
+      localStorage.removeItem(cacheKey);
+    }
+  }
+
+  const query = createOverpassQuery(
+    latitude,
+    longitude
+  );
+
+  const servers = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter"
   ];
 
+  let lastError;
 
-  // ---------------------------------------------------
-  // 3) Icon je nach Kategorie auswählen (einfache Emoji-Icons)
-  // ---------------------------------------------------
-  function erstelleIcon(emoji) {
-    return L.divIcon({
-      html: '<div style="font-size:24px;">' + emoji + '</div>',
-      className: '', // wichtig, sonst stört Leaflet-Standardstyle
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
-    });
-  }
+  for (const server of servers) {
+    try {
+      const response = await request(
+        server,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: "data=" + encodeURIComponent(query)
+        },
+        22000
+      );
 
-  function holeIcon(kategorie) {
-    if (kategorie === "park") return erstelleIcon("🌳");
-    if (kategorie === "kirche") return erstelleIcon("⛪");
-    if (kategorie === "bibliothek") return erstelleIcon("📚");
-    if (kategorie === "brunnen") return erstelleIcon("🚰");
-    if (kategorie === "vorschlag") return erstelleIcon("📍");
-    return erstelleIcon("❓");
-  }
-
-
-  // ---------------------------------------------------
-  // 4) Funktion, um einen Punkt auf der Karte anzuzeigen
-  // ---------------------------------------------------
-  function zeigePunkt(punkt) {
-    var marker = L.marker([punkt.lat, punkt.lng], { icon: holeIcon(punkt.kategorie) });
-    marker.bindPopup("<strong>" + punkt.name + "</strong>");
-    marker.addTo(map);
-  }
-
-  // Alle festen Orte anzeigen
-  orte.forEach(function (punkt) {
-    zeigePunkt(punkt);
-  });
-
-
-  // ---------------------------------------------------
-  // 5) Eigene Vorschläge (z.B. neuer Trinkbrunnen) setzen
-  // ---------------------------------------------------
-  let vorschlagModus = false;
-
-  document.getElementById("btnVorschlag").addEventListener("click", function () {
-    vorschlagModus = true;
-    alert("Klicke jetzt auf die Karte, um dort einen Vorschlag zu setzen.");
-  });
-
-  map.on("click", function (e) {
-    if (vorschlagModus) {
-      var name = prompt("Wie soll der Vorschlag heißen? (z.B. 'Trinkbrunnen Ringstraße')");
-      if (name) {
-        var neuerPunkt = {
-          name: name,
-          kategorie: "vorschlag",
-          lat: e.latlng.lat,
-          lng: e.latlng.lng
-        };
-
-        zeigePunkt(neuerPunkt);
-
-        // In localStorage speichern, damit es beim Neuladen erhalten bleibt
-        var gespeichert = JSON.parse(localStorage.getItem("vorschlaege") || "[]");
-        gespeichert.push(neuerPunkt);
-        localStorage.setItem("vorschlaege", JSON.stringify(gespeichert));
+      if (!response.ok) {
+        throw new Error(
+          "Serverstatus " + response.status
+        );
       }
-      vorschlagModus = false;
+
+      const responseData = await response.json();
+
+      const livePlaces = responseData.elements
+        .map(element => {
+          const tags = element.tags || {};
+          const category = classifyPlace(tags);
+          const elementCenter = element.center || {};
+
+          const placeLatitude =
+            element.lat || elementCenter.lat;
+
+          const placeLongitude =
+            element.lon || elementCenter.lon;
+
+          if (
+            !category ||
+            !placeLatitude ||
+            !placeLongitude
+          ) {
+            return null;
+          }
+
+          return {
+            id:
+              "o" +
+              element.type +
+              element.id,
+
+            name:
+              tags.name ||
+              categories[category][0],
+
+            category,
+            lat: placeLatitude,
+            lng: placeLongitude,
+            price: detectPrice(category, tags)
+          };
+        })
+        .filter(Boolean);
+
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          time: Date.now(),
+          data: livePlaces
+        })
+      );
+
+      mergeLivePlaces(livePlaces);
+
+      showStatus(
+        livePlaces.length +
+        " Live-Orte im 4,5-km-Umkreis geladen."
+      );
+
+      return;
+    } catch (error) {
+      lastError = error;
     }
+  }
+
+  throw lastError ||
+    new Error("Live-Daten nicht erreichbar.");
+}
+
+function mergeLivePlaces(livePlaces) {
+  places = places.filter(place => {
+    return !place.id.startsWith("o");
   });
 
-  // Gespeicherte Vorschläge beim Laden der Seite wieder anzeigen
-  var gespeicherteVorschlaege = JSON.parse(localStorage.getItem("vorschlaege") || "[]");
-  gespeicherteVorschlaege.forEach(function (punkt) {
-    zeigePunkt(punkt);
-  });
+  places.push(...livePlaces);
+  renderPlaces();
+}
 
-  // Button zum Löschen aller eigenen Vorschläge
-  document.getElementById("btnReset").addEventListener("click", function () {
-    if (confirm("Wirklich alle eigenen Vorschläge löschen?")) {
-      localStorage.removeItem("vorschlaege");
-      location.reload();
+async function searchLocation(query) {
+  if (!query.trim()) {
+    showStatus("Bitte einen Ort eingeben.");
+    return;
+  }
+
+  $("search").disabled = true;
+
+  showStatus(
+    "Ort und kühle Plätze werden gesucht …",
+    true
+  );
+
+  try {
+    const geocodingUrl =
+      "https://nominatim.openstreetmap.org/search" +
+      "?format=jsonv2" +
+      "&limit=1" +
+      "&countrycodes=de" +
+      "&viewbox=6.65,51.15,7.25,50.72" +
+      "&bounded=1" +
+      "&q=" +
+      encodeURIComponent(query);
+
+    const response = await request(
+      geocodingUrl,
+      {
+        headers: {
+          "Accept-Language": "de"
+        }
+      },
+      12000
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Die Ortssuche ist gerade nicht erreichbar."
+      );
     }
+
+    const results = await response.json();
+    const result = results[0];
+
+    if (
+      !result ||
+      !isInsideSupportedRegion(
+        Number(result.lat),
+        Number(result.lon)
+      )
+    ) {
+      throw new Error(
+        "Bitte Köln, Frechen oder eine direkte " +
+        "Nachbarstadt wählen."
+      );
+    }
+
+    const label =
+      result.display_name.split(",")[0];
+
+    setFocus(
+      result.lat,
+      result.lon,
+      label
+    );
+
+    await loadLivePlaces(
+      result.lat,
+      result.lon
+    );
+  } catch (error) {
+    if (error.name === "AbortError") {
+      showStatus(
+        "Die Anfrage dauerte zu lange. " +
+        "Bitte erneut versuchen."
+      );
+    } else {
+      showStatus(
+        error.message ||
+        "Die Suche konnte nicht durchgeführt werden."
+      );
+    }
+  } finally {
+    $("search").disabled = false;
+  }
+}
+
+async function loadWeather(
+  latitude,
+  longitude,
+  label
+) {
+  try {
+    const weatherUrl =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + latitude +
+      "&longitude=" + longitude +
+      "&current=" +
+      "temperature_2m," +
+      "apparent_temperature," +
+      "relative_humidity_2m" +
+      "&daily=uv_index_max" +
+      "&forecast_days=1" +
+      "&timezone=auto";
+
+    const response = await request(
+      weatherUrl,
+      {},
+      9000
+    );
+
+    if (!response.ok) {
+      throw new Error("Wetter nicht erreichbar.");
+    }
+
+    const data = await response.json();
+    const current = data.current;
+    const uvIndex = data.daily.uv_index_max[0];
+
+    $("temp").textContent =
+      Math.round(current.temperature_2m) +
+      " °C";
+
+    $("feel").textContent =
+      "Gefühlt " +
+      Math.round(current.apparent_temperature) +
+      " °C · " +
+      label;
+
+    $("details").textContent =
+      "Luftfeuchte " +
+      current.relative_humidity_2m +
+      " % · UV " +
+      Math.round(uvIndex);
+
+    const heatWarning =
+      current.apparent_temperature >= 28 ||
+      uvIndex >= 6;
+
+    $("warning").classList.toggle(
+      "show",
+      heatWarning
+    );
+
+    $("warningText").textContent =
+      "Gefühlte " +
+      Math.round(current.apparent_temperature) +
+      " °C, UV " +
+      Math.round(uvIndex) +
+      ". Schatten suchen und regelmäßig trinken.";
+  } catch (error) {
+    $("temp").textContent =
+      "Wetter nicht verfügbar";
+
+    $("feel").textContent = label;
+    $("details").textContent = "";
+  }
+}
+
+$("form").addEventListener("submit", event => {
+  event.preventDefault();
+  searchLocation($("query").value);
+});
+
+document
+  .querySelectorAll(".city")
+  .forEach(button => {
+    button.addEventListener("click", () => {
+      $("query").value = button.textContent;
+      searchLocation(button.textContent);
+    });
   });
 
+document
+  .querySelectorAll(".chip")
+  .forEach(button => {
+    button.addEventListener("click", () => {
+      const category = button.dataset.c;
+
+      if (activeCategories.has(category)) {
+        activeCategories.delete(category);
+      } else {
+        activeCategories.add(category);
+      }
+
+      button.classList.toggle(
+        "active",
+        activeCategories.has(category)
+      );
+
+      renderPlaces();
+    });
+  });
+
+$("price").addEventListener(
+  "change",
+  renderPlaces
+);
+
+$("locate").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    showStatus(
+      "Die Standortbestimmung wird nicht unterstützt."
+    );
+
+    return;
+  }
+
+  showStatus(
+    "Standort wird bestimmt …",
+    true
+  );
+
+  navigator.geolocation.getCurrentPosition(
+    async position => {
+      const latitude =
+        position.coords.latitude;
+
+      const longitude =
+        position.coords.longitude;
+
+      if (
+        !isInsideSupportedRegion(
+          latitude,
+          longitude
+        )
+      ) {
+        showStatus(
+          "Dein Standort liegt außerhalb der " +
+          "unterstützten Region."
+        );
+
+        return;
+      }
+
+      setFocus(
+        latitude,
+        longitude,
+        "deinem Standort"
+      );
+
+      if (userMarker) {
+        map.removeLayer(userMarker);
+      }
+
+      userMarker = L.circleMarker(
+        [latitude, longitude],
+        {
+          radius:9,
+          color:"white",
+          fillColor:"#2563eb",
+          fillOpacity:1,
+          weight:3
+        }
+      ).addTo(map);
+
+      userMarker.bindPopup(
+        "Dein Standort"
+      );
+
+      try {
+        await loadLivePlaces(
+          latitude,
+          longitude
+        );
+      } catch (error) {
+        showStatus(
+          "Live-Daten sind gerade nicht erreichbar. " +
+          "Die Standardorte bleiben sichtbar."
+        );
+      }
+    },
+    () => {
+      showStatus(
+        "Der Standort konnte nicht ermittelt werden."
+      );
+    },
+    {
+      enableHighAccuracy:true,
+      timeout:12000
+    }
+  );
+});
+
+$("theme").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+
+  const darkModeIsActive =
+    document.body.classList.contains("dark");
+
+  localStorage.setItem(
+    "theme",
+    darkModeIsActive ? "1" : "0"
+  );
+
+  $("theme").innerHTML = darkModeIsActive
+    ? "<span>☀️</span> Hell"
+    : "<span>🌙</span> Dunkel";
+});
+
+if (localStorage.getItem("theme") === "1") {
+  document.body.classList.add("dark");
+
+  $("theme").innerHTML =
+    "<span>☀️</span> Hell";
+}
+
+$("remind").addEventListener("click", () => {
+  if (reminderTimer) {
+    clearInterval(reminderTimer);
+    reminderTimer = null;
+
+    $("remind").textContent = "Starten";
+    $("remindState").textContent =
+      "Erinnerung beendet.";
+
+    return;
+  }
+
+  const minutes = Number(
+    $("minutes").value
+  );
+
+  reminderTimer = setInterval(() => {
+    alert(
+      "Trinkpause: Zeit für ein Glas Wasser!"
+    );
+  }, minutes * 60 * 1000);
+
+  $("remind").textContent = "Stoppen";
+
+  $("remindState").textContent =
+    "Nächste Erinnerung in " +
+    minutes +
+    " Minuten.";
+});
+
+renderPlaces();
+
+loadWeather(
+  center.lat,
+  center.lng,
+  "Köln"
+);
 </script>
 
 </body>
 </html>
+```

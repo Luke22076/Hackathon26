@@ -1,77 +1,585 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trinkrechner</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trinkrechner | The Heating Company</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+:root {
+    --transition: 0.3s ease;
+    --brand: #ff6b35;
+    --brand-dark: #e85a24;
+    --glass-bg: rgba(255,255,255,0.7);
+    --card-bg: #ffffff;
+}
+* { scroll-behavior: smooth; }
+body {
+    transition: background-color var(--transition), color var(--transition);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255,193,7,0.10), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(220,53,69,0.10), transparent 45%),
+        #f7f8fa;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- Dark Mode ---------- */
+body.dark-mode {
+    --glass-bg: rgba(40,40,40,0.7);
+    --card-bg: #2a2a2a;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255,193,7,0.06), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(220,53,69,0.08), transparent 45%),
+        #161616;
+    color: #e0e0e0;
+}
+body.dark-mode .card,
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .list-group-item {
+    background-color: var(--card-bg);
+    color: #e0e0e0;
+    border-color: #444;
+}
+body.dark-mode .form-control::placeholder { color: #888; }
+body.dark-mode .navbar,
+body.dark-mode .bg-light,
+body.dark-mode .nav-foot { background-color: #1e1e1e !important; }
+body.dark-mode .nav-link,
+body.dark-mode .navbar-brand { color: #e0e0e0 !important; }
+body.dark-mode .text-muted { color: #9a9a9a !important; }
+body.dark-mode .info-tile { background: #242424; }
+
+/* ---------- Navbar ---------- */
+.navbar {
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+}
+.navbar-brand img { transition: transform var(--transition); }
+.navbar-brand:hover img { transform: scale(1.05); }
+.nav-link { font-weight: 500; position: relative; }
+.nav-link.active::after {
+    content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
+    height: 3px; border-radius: 3px; background: var(--brand);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+    background: linear-gradient(135deg, #ff6b35, #f7931e, #dc3545);
+    color: #fff; border-radius: 24px; padding: 2.5rem;
+    box-shadow: 0 12px 40px rgba(255,107,53,0.25);
+    position: relative; overflow: hidden;
+}
+.hero::after {
+    content: "\F5A6"; font-family: "bootstrap-icons";
+    position: absolute; right: -20px; top: -30px;
+    font-size: 12rem; opacity: 0.15;
+}
+.hero h1 { font-weight: 800; }
+
+/* ---------- Cards ---------- */
+.card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 18px;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+.glass { background: var(--glass-bg); backdrop-filter: blur(8px); }
+
+.btn-brand {
+    background: var(--brand); color: #fff; border: none; font-weight: 600;
+    transition: all var(--transition);
+}
+.btn-brand:hover { background: var(--brand-dark); color: #fff; transform: translateY(-2px); }
+
+/* ---------- Heat Gauge ---------- */
+.heat-gauge {
+    height: 26px; border-radius: 13px;
+    background: linear-gradient(to right, #28a745, #ffc107, #fd7e14, #dc3545);
+    position: relative; margin: 22px 0 6px;
+}
+.heat-gauge-marker {
+    position: absolute; top: -7px; width: 6px; height: 40px;
+    background: #111; border-radius: 3px; transform: translateX(-50%);
+    transition: left 0.6s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 0 6px rgba(0,0,0,0.5);
+}
+.heat-gauge-marker::after {
+    content: attr(data-temp); position: absolute; top: -22px; left: 50%;
+    transform: translateX(-50%); font-size: .7rem; font-weight: 700;
+    background: #111; color: #fff; padding: 1px 6px; border-radius: 6px; white-space: nowrap;
+}
+body.dark-mode .heat-gauge-marker,
+body.dark-mode .heat-gauge-marker::after { background: #fff; }
+body.dark-mode .heat-gauge-marker::after { color: #111; }
+
+/* ---------- Result animation ---------- */
+.result-card { transition: all 0.4s ease; transform: translateY(14px); opacity: 0; }
+.result-card.show { transform: translateY(0); opacity: 1; }
+
+.water-icon { font-size: 2rem; color: #0dcaf0; }
+.theme-toggle { cursor: pointer; transition: transform var(--transition); }
+.theme-toggle:hover { transform: rotate(20deg) scale(1.15); }
+
+/* ---------- UV / Info tiles ---------- */
+.info-tile {
+    background: #f1f3f5; border-radius: 14px; padding: 14px;
+    text-align: center; height: 100%;
+}
+.info-tile .big { font-size: 1.6rem; font-weight: 700; }
+.info-tile .lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; opacity: .7; }
+
+/* ---------- Footer ---------- */
+.nav-foot { background: #fff; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.06); }
+footer { margin-top: 10px; padding: 20px; }
+.fade-in { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+/* ---------- Progress ring ---------- */
+.ring-wrap { display:flex; align-items:center; gap:14px; }
+.ring { --p:0; width:70px; height:70px; border-radius:50%;
+    background: conic-gradient(#0dcaf0 calc(var(--p)*1%), #dfe3e6 0);
+    display:flex; align-items:center; justify-content:center; transition: --p .6s; }
+.ring::before { content:""; position:absolute; width:52px; height:52px; border-radius:50%; background: var(--card-bg); }
+.ring span { position:relative; font-weight:700; font-size:.85rem; }
+
+.badge-soft { background: rgba(255,107,53,.15); color: var(--brand); font-weight:600; }
+    </style>
 </head>
 
 <body>
-  <div class="container mt-4">
-    <h1>Trinkrechner</h1>
-    <p>Berechne, wie viel du am Tag trinken solltest.</p>
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar navbar-expand-lg bg-light sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="./index.html">
+            <img src="./img/heatingcomp_logo.png" alt="Logo" width="120" height="58">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="./trinkrechner.html">Trinkrechner</a></li>
+                <li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+                <li class="nav-item"><a class="nav-link" href="./hitzewarner.html">Hitzewarner</a></li>
+                <li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+                <li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+            </ul>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="small text-muted d-none d-lg-inline" id="liveClock"></span>
+                <i class="bi bi-moon-stars-fill fs-4 theme-toggle" id="themeToggle" title="Dark Mode umschalten"></i>
+            </div>
+        </div>
+    </div>
+</nav>
 
-    <label>Gewicht in kg</label>
-    <input class="form-control mb-3" type="number" id="gewicht">
+<div class="container my-4">
 
-    <label>Alter</label>
-    <input class="form-control mb-3" type="number" id="alter">
+<!-- ===================== HERO ===================== -->
+<div class="hero mb-4 fade-in">
+    <h1 class="mb-2"><i class="bi bi-droplet-fill"></i> Trinkrechner</h1>
+    <p class="mb-0 fs-5">Berechne, wie viel Wasser du heute trinken solltest – basierend auf Gewicht, Aktivität und Außentemperatur.</p>
+</div>
 
-    <label>Machst du heute Sport?</label>
-    <select class="form-select mb-3" id="sport">
-      <option value="nein">Nein</option>
-      <option value="ja">Ja</option>
-    </select>
+<div class="row g-4">
+<!-- ============ EINGABE ============ -->
+<div class="col-lg-5">
+    <div class="card p-4 shadow-sm mb-4">
+        <h5 class="mb-3"><i class="bi bi-sliders"></i> Deine Angaben</h5>
 
-    <label>Schon getrunken in Liter</label>
-    <input class="form-control mb-3" type="number" id="getrunken" value="0" step="0.1">
+        <label class="form-label">Körpergewicht in kg</label>
+        <input class="form-control mb-3" type="number" id="gewicht" placeholder="z.B. 75">
 
-    <button class="btn btn-primary" onclick="berechnen()">Berechnen</button>
+        <label class="form-label">Alter</label>
+        <input class="form-control mb-3" type="number" id="alter" placeholder="z.B. 30">
 
-    <p class="mt-3" id="ergebnis"></p>
-  </div>
+        <label class="form-label">Außentemperatur in °C (optional)</label>
+        <input class="form-control mb-3" type="number" id="temperatur" placeholder="z.B. 28">
 
-  <script>
-    function berechnen() {
-      let gewicht = Number(document.getElementById("gewicht").value);
-      let alter = Number(document.getElementById("alter").value);
-      let sport = document.getElementById("sport").value;
-      let getrunken = Number(document.getElementById("getrunken").value);
+        <label class="form-label">Geplante Aktivität heute</label>
+        <select class="form-select mb-3" id="aktivitaet">
+            <option value="ruhe">Ruhe / drinnen</option>
+            <option value="leicht">Leichte Aktivität (Spaziergang)</option>
+            <option value="mittel">Mittel (Radfahren, Gartenarbeit)</option>
+            <option value="hoch">Intensiv (Sport, harte Arbeit)</option>
+        </select>
 
-      if (gewicht <= 0 || alter <= 0 || getrunken < 0) {
-        document.getElementById("ergebnis").innerHTML = "Bitte alles richtig ausfüllen.";
-        return;
-      }
+        <label class="form-label">Schon getrunken heute in Liter</label>
+        <input class="form-control mb-3" type="number" id="getrunken" placeholder="z.B. 0.5" step="0.1">
 
-      let wasserProKilo = 0.035;
+        <div class="d-flex gap-2">
+            <button class="btn btn-brand flex-grow-1" onclick="berechnen()"><i class="bi bi-calculator"></i> Berechnen</button>
+            <button class="btn btn-outline-secondary" onclick="reset()" title="Zurücksetzen"><i class="bi bi-arrow-counterclockwise"></i></button>
+        </div>
+    </div>
+</div>
 
-      if (alter < 15) {
-        wasserProKilo = 0.04;
-      }
+<!-- ============ ERGEBNIS ============ -->
+<div class="col-lg-7">
+    <div class="card p-4 shadow-sm result-card d-none" id="ergebnisCard">
+        <div id="ergebnis"></div>
 
-      if (alter >= 51) {
-        wasserProKilo = 0.03;
-      }
+        <!-- Hitze-Skala -->
+        <div class="heat-gauge" id="gauge" style="display:none;">
+            <div class="heat-gauge-marker" id="gaugeMarker" data-temp="" style="left: 0%;"></div>
+        </div>
+        <div class="d-flex justify-content-between small text-muted" id="gaugeLabels" style="display:none;">
+            <span>15°C</span><span>25°C</span><span>35°C</span><span>45°C</span>
+        </div>
 
-      let gesamt = gewicht * wasserProKilo;
-      let essen = gesamt / 3;
-      let trinken = gesamt - essen;
+        <!-- Info-Kacheln -->
+        <div class="row g-2 mt-3" id="infoTiles" style="display:none;">
+            <div class="col-4"><div class="info-tile"><div class="lbl">Dein Gewicht</div><div class="big" id="tileGewicht">–</div></div></div>
+            <div class="col-4"><div class="info-tile"><div class="lbl">Aktivitätsfaktor</div><div class="big" id="tileAktivitaet">–</div></div></div>
+            <div class="col-4"><div class="info-tile"><div class="lbl">Temperatur-Bonus</div><div class="big" id="tileTemp">–</div></div></div>
+        </div>
 
-      if (sport == "ja") {
-        trinken = trinken + 0.5;
-      }
+        <!-- Trinkziel mit Fortschrittsring -->
+        <div class="mt-4 p-3 rounded glass border" id="trinkBox" style="display:none;">
+            <div class="ring-wrap">
+                <div class="ring" id="trinkRing" style="position:relative;"><span id="ringLabel">0%</span></div>
+                <div>
+                    <span class="water-icon"><i class="bi bi-droplet-fill"></i></span>
+                    <div id="trinkText" class="mt-2 fw-bold"></div>
+                    <div class="mt-3 d-flex gap-2 align-items-center flex-wrap">
+                        <button class="btn btn-sm btn-outline-info" onclick="glasTrinken()"><i class="bi bi-cup-straw"></i> +250 ml</button>
+                        <span class="small text-muted" id="trinkStand"></span>
+                        <button class="btn btn-sm btn-link text-danger p-0" onclick="trinkReset()">reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      let rest = trinken = getrunken;
-      if (rest < 0) {
-        rest = 0;
-      }
+        <!-- Trink-Tipps -->
+        <div class="mt-3" id="tippBox" style="display:none;">
+            <h6 class="mb-2"><i class="bi bi-lightbulb"></i> Trink-Tipps</h6>
+            <ul class="list-group list-group-flush" id="tippListe"></ul>
+        </div>
+    </div>
 
-      document.getElementById("ergebnis").innerHTML =
-        "Wasser aus Essen: " + essen.toFixed(1) + " Liter<br>" +
-        "Du solltest trinken: " + trinken.toFixed(1) + " Liter<br>" +
-        "Noch zu trinken: " + rest.toFixed(1) + " Liter";
+    <!-- Wasserhaushalt Info -->
+    <div class="card p-4 shadow-sm mt-4">
+        <h6 class="mb-3"><i class="bi bi-info-circle"></i> Wissenswertes zum Wasserhaushalt</h6>
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="info-tile">
+                    <div class="lbl">Faustregel</div>
+                    <div class="big">30 ml/kg</div>
+                    <small class="text-muted">Basis-Trinkempfehlung</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-tile">
+                    <div class="lbl">Bei Hitze</div>
+                    <div class="big">+50%</div>
+                    <small class="text-muted">erhöhter Flüssigkeitsbedarf</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-tile">
+                    <div class="lbl">Bei Sport</div>
+                    <div class="big">+0,5–1,0 L</div>
+                    <small class="text-muted">je nach Intensität</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-tile">
+                    <div class="lbl">Optimale Aufnahme</div>
+                    <div class="big">200 ml</div>
+                    <small class="text-muted">pro Schluck / Glas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verlauf -->
+    <div class="card p-3 shadow-sm mt-4" id="verlaufCard" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Letzte Berechnungen</h5>
+            <button class="btn btn-sm btn-outline-danger" onclick="verlaufLoeschen()">Löschen</button>
+        </div>
+        <ul class="list-group list-group-flush mt-2" id="verlaufListe"></ul>
+    </div>
+</div>
+</div>
+
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<nav class="nav-foot">
+    <ul class="nav justify-content-center flex-wrap">
+        <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a></li>
+        <li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+        <li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+        <li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+        <li class="nav-item"><a class="nav-link" href="./legal/impressum.html">Impressum</a></li>
+        <li class="nav-item"><a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a></li>
+        <li class="nav-item"><a class="nav-link" href="./legal/agb.html">AGB</a></li>
+    </ul>
+</nav>
+<footer class="text-center">
+    <p class="mb-0">&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
+</footer>
+
+<!-- Back to top -->
+<button class="btn btn-brand rounded-circle shadow" id="toTop" title="Nach oben"
+    style="position:fixed;bottom:24px;right:24px;width:48px;height:48px;display:none;z-index:1000;">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ---------- Dark Mode ---------- */
+const themeToggle = document.getElementById("themeToggle");
+function applyTheme(mode) {
+    if (mode === "dark") {
+        document.body.classList.add("dark-mode");
+        themeToggle.className = "bi bi-sun-fill fs-4 theme-toggle";
+    } else {
+        document.body.classList.remove("dark-mode");
+        themeToggle.className = "bi bi-moon-stars-fill fs-4 theme-toggle";
     }
-  </script>
+}
+applyTheme(localStorage.getItem("theme") || "light");
+themeToggle.addEventListener("click", () => {
+    const neu = document.body.classList.contains("dark-mode") ? "light" : "dark";
+    localStorage.setItem("theme", neu);
+    applyTheme(neu);
+});
+
+/* ---------- Live-Uhr ---------- */
+function tick() {
+    document.getElementById("liveClock").innerHTML =
+        '<i class="bi bi-clock"></i> ' + new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 10000);
+
+/* ---------- Back to top ---------- */
+const toTop = document.getElementById("toTop");
+window.addEventListener("scroll", () => toTop.style.display = window.scrollY > 300 ? "block" : "none");
+toTop.onclick = () => window.scrollTo({top:0, behavior:"smooth"});
+
+/* ---------- Eingaben speichern ---------- */
+["gewicht","alter","temperatur","aktivitaet"].forEach(id => {
+    const el = document.getElementById(id);
+    const g = localStorage.getItem("tr_"+id);
+    if (g) el.value = g;
+    el.addEventListener("input", () => localStorage.setItem("tr_"+id, el.value));
+});
+
+/* ---------- Trinkempfehlung berechnen ---------- */
+function berechne_trinkziel(gewicht, aktivitaet, temperatur) {
+    // Basis: 30 ml pro kg
+    let basis = gewicht * 0.030;
+    
+    // Aktivitäts-Zuschlag
+    const zuschlag_aktivitaet = {
+        "ruhe": 0,
+        "leicht": 0.3,
+        "mittel": 0.7,
+        "hoch": 1.2
+    };
+    basis += zuschlag_aktivitaet[aktivitaet] || 0;
+    
+    // Temperatur-Zuschlag
+    if (temperatur >= 25) basis += 0.5;
+    if (temperatur >= 30) basis += 0.5;
+    if (temperatur >= 35) basis += 0.7;
+    
+    return Math.max(1.5, Math.round(basis * 2) / 2); // auf 0,5 runden
+}
+
+/* ---------- Gauge Update ---------- */
+function updateGauge(temp) {
+    if (!temp) return;
+    const min=15, max=45;
+    let pct = Math.max(0, Math.min(100, ((temp-min)/(max-min))*100));
+    const m = document.getElementById("gaugeMarker");
+    m.style.left = pct + "%";
+    m.setAttribute("data-temp", temp + "°C");
+    document.getElementById("gauge").style.display = "block";
+    document.getElementById("gaugeLabels").style.display = "flex";
+}
+
+/* ---------- Trink-Tracker ---------- */
+let trinkZiel = 2.0;
+function updateTrinkRing() {
+    const getrunken = parseFloat(localStorage.getItem("tr_getrunken") || "0");
+    const pct = Math.min(100, Math.round((getrunken/trinkZiel)*100));
+    const ring = document.getElementById("trinkRing");
+    ring.style.background = `conic-gradient(#0dcaf0 ${pct}%, #dfe3e6 0)`;
+    document.getElementById("ringLabel").textContent = pct + "%";
+    document.getElementById("trinkStand").textContent = `${getrunken.toFixed(2)} / ${trinkZiel.toFixed(1)} L`;
+}
+function glasTrinken() {
+    let g = parseFloat(localStorage.getItem("tr_getrunken") || "0") + 0.25;
+    localStorage.setItem("tr_getrunken", g);
+    updateTrinkRing();
+}
+function trinkReset(){ localStorage.setItem("tr_getrunken","0"); updateTrinkRing(); }
+
+/* ---------- Verlauf ---------- */
+function verlaufSpeichern(e) {
+    let v = JSON.parse(localStorage.getItem("tr_verlauf") || "[]");
+    v.unshift(e); v = v.slice(0,5);
+    localStorage.setItem("tr_verlauf", JSON.stringify(v));
+    verlaufAnzeigen();
+}
+function verlaufAnzeigen() {
+    const v = JSON.parse(localStorage.getItem("tr_verlauf") || "[]");
+    const card = document.getElementById("verlaufCard");
+    const liste = document.getElementById("verlaufListe");
+    if (!v.length) { card.style.display="none"; return; }
+    card.style.display="block";
+    liste.innerHTML = v.map(e =>
+        `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+            <span><i class="bi bi-clock"></i> ${e.zeit}</span>
+            <span class="badge bg-info">${e.ziel.toFixed(1)} L</span>
+        </li>`).join("");
+}
+function verlaufLoeschen(){ localStorage.removeItem("tr_verlauf"); verlaufAnzeigen(); }
+verlaufAnzeigen();
+
+/* ---------- Hauptfunktion ---------- */
+function berechnen() {
+    const gewicht = Number(document.getElementById("gewicht").value);
+    const alter = Number(document.getElementById("alter").value);
+    const temperatur = document.getElementById("temperatur").value ? Number(document.getElementById("temperatur").value) : 20;
+    const aktivitaet = document.getElementById("aktivitaet").value;
+    const getrunken_input = Number(document.getElementById("getrunken").value) || 0;
+    const ergebnisCard = document.getElementById("ergebnisCard");
+    const ergebnis = document.getElementById("ergebnis");
+
+    const showCard = () => { 
+        ergebnisCard.classList.remove("d-none"); 
+        setTimeout(()=>ergebnisCard.classList.add("show"),10); 
+    };
+
+    if (!gewicht || !alter) {
+        showCard();
+        ergebnis.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-circle"></i> Bitte Gewicht und Alter ausfüllen.</div>';
+        return;
+    }
+
+    if (alter <= 0 || alter > 120 || gewicht <= 0) {
+        showCard();
+        ergebnis.innerHTML = '<div class="alert alert-danger mb-0">Bitte realistische Werte eingeben.</div>';
+        return;
+    }
+
+    // Berechne Trinkziel
+    trinkZiel = berechne_trinkziel(gewicht, aktivitaet, temperatur);
+    const offen = Math.max(0, trinkZiel - getrunken_input);
+
+    // Bewertung
+    let stufe, tipp, farbe, icon;
+    const aktivitaet_label = {
+        "ruhe": "Ruhe",
+        "leicht": "Leichte Aktivität",
+        "mittel": "Mittlere Aktivität",
+        "hoch": "Intensive Aktivität"
+    };
+
+    if (offen <= 0.5) {
+        stufe = "Ziel erreicht! 🎉"; 
+        farbe = "alert-success"; 
+        icon = "bi-check-circle-fill"; 
+        tipp = "Du hast dein Trinkziel für heute erreicht. Trinke aber noch regelmäßig!";
+    } else if (offen <= 1.0) {
+        stufe = "Noch ein kleines Bisschen"; 
+        farbe = "alert-info"; 
+        icon = "bi-droplet"; 
+        tipp = `Du brauchst noch etwa ${offen.toFixed(1)} Liter bis zu deinem Ziel.`;
+    } else {
+        stufe = "Noch viel zu trinken"; 
+        farbe = "alert-warning"; 
+        icon = "bi-cup-straw"; 
+        tipp = `Du solltest heute noch etwa ${offen.toFixed(1)} Liter trinken (ca. ${Math.ceil(offen*1000/250)} Gläser à 250 ml).`;
+    }
+
+    if (alter >= 65) tipp += " Als älterer Mensch solltest du auch ohne Durst regelmäßig trinken.";
+    if (aktivitaet === "hoch") tipp += " Bei intensiver Aktivität trinke alle 15–20 Minuten einen Schluck.";
+
+    ergebnis.innerHTML =
+        `<div class="alert ${farbe} mb-0 fade-in">
+            <h4 class="mb-1"><i class="bi ${icon}"></i> ${stufe}</h4>
+            <p class="mb-0">${tipp}</p>
+        </div>`;
+
+    // Update Gauge
+    if (temperatur > 15) updateGauge(temperatur);
+
+    // Info-Tiles
+    const akt_text = {
+        "ruhe": "0 L",
+        "leicht": "+0,3 L",
+        "mittel": "+0,7 L",
+        "hoch": "+1,2 L"
+    };
+    const temp_bonus = temperatur >= 35 ? "+1,7 L" : temperatur >= 30 ? "+1,0 L" : temperatur >= 25 ? "+0,5 L" : "0 L";
+
+    document.getElementById("infoTiles").style.display="flex";
+    document.getElementById("tileGewicht").textContent = gewicht + " kg";
+    document.getElementById("tileAktivitaet").textContent = akt_text[aktivitaet];
+    document.getElementById("tileTemp").textContent = temp_bonus;
+
+    // Trink-Box
+    document.getElementById("trinkBox").style.display="block";
+    document.getElementById("trinkText").innerHTML =
+        `<strong>Trinkziel heute: ${trinkZiel.toFixed(1)} L Wasser</strong>` +
+        `<div class="small text-muted">Basis: ${(gewicht*0.030).toFixed(1)} L + Aktivität + Hitze</div>`;
+    
+    // Prüfe, ob getrunken-Input gesetzt ist
+    if (getrunken_input > 0) {
+        localStorage.setItem("tr_getrunken", getrunken_input);
+    }
+    updateTrinkRing();
+
+    // Tipps
+    const tippBox = document.getElementById("tippBox");
+    const tippListe = document.getElementById("tippListe");
+    let tipps = [
+        ["Kleine Schlucke", "Trinke häufig kleine Mengen statt großer Mengen auf einmal"],
+        ["Regelmäßig", `Ca. ${(trinkZiel/6).toFixed(1)} L pro Stunde wenn du aktiv bist`],
+        ["Temperatur", "Lauwarmes Wasser wird besser aufgenommen als eiskaltes"]
+    ];
+    if (temperatur >= 25) tipps.push(["Bei Hitze", "Auch ohne Durst trinken – das Durstempfinden ist bei Hitze verzögert"]);
+    if (aktivitaet === "hoch") tipps.push(["Während Sport", "Elektrolyt-Getränke alle 20–30 Min. bei Daueranstrengung"]);
+
+    tippBox.style.display="block";
+    tippListe.innerHTML = tipps.map(t =>
+        `<li class="list-group-item bg-transparent d-flex gap-2 align-items-start">
+            <i class="bi bi-star-fill text-warning"></i>
+            <div><strong>${t[0]}</strong><div class="small text-muted">${t[1]}</div></div>
+        </li>`).join("");
+
+    showCard();
+
+    verlaufSpeichern({
+        zeit: new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'}),
+        ziel: trinkZiel
+    });
+}
+
+/* ---------- Reset ---------- */
+function reset() {
+    ["gewicht","alter","temperatur","aktivitaet","getrunken"].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = "";
+    });
+    document.getElementById("aktivitaet").value="ruhe";
+    ["tr_gewicht","tr_alter","tr_temperatur","tr_aktivitaet"].forEach(k=>localStorage.removeItem(k));
+    document.getElementById("ergebnisCard").classList.add("d-none");
+    document.getElementById("ergebnisCard").classList.remove("show");
+}
+
+/* ---------- Enter-Taste ---------- */
+document.querySelectorAll("#gewicht,#alter,#temperatur,#getrunken").forEach(el =>
+    el.addEventListener("keypress", e => { if(e.key==="Enter") berechnen(); }));
+</script>
 </body>
 </html>

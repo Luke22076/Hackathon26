@@ -3,74 +3,636 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hitze-Warner</title>
+  <title>Hitze-Warner | The Heating Company</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --transition: 0.3s ease;
+      --brand: #ff6b35;
+      --brand-dark: #e85a24;
+      --glass-bg: rgba(255,255,255,0.7);
+      --card-bg: #ffffff;
+    }
+    * { scroll-behavior: smooth; }
+    body {
+      transition: background-color var(--transition), color var(--transition);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,193,7,0.10), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(220,53,69,0.10), transparent 45%),
+        #f7f8fa;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* ---------- Dark Mode ---------- */
+    body.dark-mode {
+      --glass-bg: rgba(40,40,40,0.7);
+      --card-bg: #2a2a2a;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,193,7,0.06), transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(220,53,69,0.08), transparent 45%),
+        #161616;
+      color: #e0e0e0;
+    }
+    body.dark-mode .card,
+    body.dark-mode .form-control,
+    body.dark-mode .form-select,
+    body.dark-mode .list-group-item {
+      background-color: var(--card-bg);
+      color: #e0e0e0;
+      border-color: #444;
+    }
+    body.dark-mode .form-control::placeholder { color: #888; }
+    body.dark-mode .navbar,
+    body.dark-mode .bg-light,
+    body.dark-mode .nav-foot { background-color: #1e1e1e !important; }
+    body.dark-mode .nav-link,
+    body.dark-mode .navbar-brand { color: #e0e0e0 !important; }
+    body.dark-mode .text-muted { color: #9a9a9a !important; }
+    body.dark-mode .info-tile { background: #242424; }
+
+    /* ---------- Navbar ---------- */
+    .navbar {
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    }
+    .navbar-brand img { transition: transform var(--transition); }
+    .navbar-brand:hover img { transform: scale(1.05); }
+    .nav-link { font-weight: 500; position: relative; }
+    .nav-link.active::after {
+      content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px;
+      height: 3px; border-radius: 3px; background: var(--brand);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      background: linear-gradient(135deg, #ff6b35, #f7931e, #dc3545);
+      color: #fff; border-radius: 24px; padding: 2.5rem;
+      box-shadow: 0 12px 40px rgba(255,107,53,0.25);
+      position: relative; overflow: hidden;
+    }
+    .hero::after {
+      content: "\F5A6"; font-family: "bootstrap-icons";
+      position: absolute; right: -20px; top: -30px;
+      font-size: 12rem; opacity: 0.15;
+    }
+    .hero h1 { font-weight: 800; }
+
+    /* ---------- Cards ---------- */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 18px;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .glass { background: var(--glass-bg); backdrop-filter: blur(8px); }
+
+    .btn-brand {
+      background: var(--brand); color: #fff; border: none; font-weight: 600;
+      transition: all var(--transition);
+    }
+    .btn-brand:hover { background: var(--brand-dark); color: #fff; transform: translateY(-2px); }
+
+    /* ---------- Heat Gauge ---------- */
+    .heat-gauge {
+      height: 26px; border-radius: 13px;
+      background: linear-gradient(to right, #28a745, #ffc107, #fd7e14, #dc3545);
+      position: relative; margin: 22px 0 6px;
+    }
+    .heat-gauge-marker {
+      position: absolute; top: -7px; width: 6px; height: 40px;
+      background: #111; border-radius: 3px; transform: translateX(-50%);
+      transition: left 0.6s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    }
+    .heat-gauge-marker::after {
+      content: attr(data-temp); position: absolute; top: -22px; left: 50%;
+      transform: translateX(-50%); font-size: .7rem; font-weight: 700;
+      background: #111; color: #fff; padding: 1px 6px; border-radius: 6px; white-space: nowrap;
+    }
+    body.dark-mode .heat-gauge-marker,
+    body.dark-mode .heat-gauge-marker::after { background: #fff; }
+    body.dark-mode .heat-gauge-marker::after { color: #111; }
+
+    /* ---------- Result animation ---------- */
+    .result-card { transition: all 0.4s ease; transform: translateY(14px); opacity: 0; }
+    .result-card.show { transform: translateY(0); opacity: 1; }
+
+    .water-icon { font-size: 2rem; color: #0dcaf0; }
+    .theme-toggle { cursor: pointer; transition: transform var(--transition); }
+    .theme-toggle:hover { transform: rotate(20deg) scale(1.15); }
+
+    /* ---------- UV / Info tiles ---------- */
+    .info-tile {
+      background: #f1f3f5; border-radius: 14px; padding: 14px;
+      text-align: center; height: 100%;
+    }
+    .info-tile .big { font-size: 1.6rem; font-weight: 700; }
+    .info-tile .lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; opacity: .7; }
+
+    /* ---------- Symptom checklist ---------- */
+    .symptom-item { cursor: pointer; }
+
+    /* ---------- Footer ---------- */
+    .nav-foot { background: #fff; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.06); }
+    footer { margin-top: 10px; padding: 20px; }
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+    /* ---------- Progress ring (Trinkziel) ---------- */
+    .ring-wrap { display:flex; align-items:center; gap:14px; }
+    .ring { --p:0; width:70px; height:70px; border-radius:50%;
+      background: conic-gradient(#0dcaf0 calc(var(--p)*1%), #dfe3e6 0);
+      display:flex; align-items:center; justify-content:center; transition: --p .6s; }
+    .ring::before { content:""; position:absolute; width:52px; height:52px; border-radius:50%; background: var(--card-bg); }
+    .ring span { position:relative; font-weight:700; font-size:.85rem; }
+
+    .badge-soft { background: rgba(255,107,53,.15); color: var(--brand); font-weight:600; }
+  </style>
 </head>
 
 <body>
-  <div class="container mt-4">
-    <h1>Hitze-Warner</h1>
-    <p>Gib die Temperatur und dein Alter ein.</p>
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar navbar-expand-lg bg-light sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="./index.html">
+      <img src="./img/heatingcomp_logo.png" alt="Logo" width="120" height="58">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trinkrechner</a></li>
+        <li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="./hitzewarner.html">Hitzewarner</a></li>
+        <li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+        <li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+      </ul>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <!-- FEATURE: Live-Uhr -->
+        <span class="small text-muted d-none d-lg-inline" id="liveClock"></span>
+        <!-- FEATURE: Dark-Mode-Umschalter -->
+        <i class="bi bi-moon-stars-fill fs-4 theme-toggle" id="themeToggle" title="Dark Mode umschalten"></i>
+      </div>
+    </div>
+  </div>
+</nav>
 
-    <label>Temperatur in °C</label>
-    <input class="form-control mb-3" type="number" id="temperatur">
+<div class="container my-4">
 
-    <label>Alter</label>
-    <input class="form-control mb-3" type="number" id="alter">
-
-    <button class="btn btn-primary" onclick="pruefen()">Prüfen</button>
-
-    <div class="alert mt-3 d-none" id="ergebnis"></div>
-
-    <small>
-      Dies ist nur eine einfache Einschätzung und keine amtliche Hitzewarnung.
-    </small>
+  <!-- ===================== HERO ===================== -->
+  <div class="hero mb-4 fade-in">
+    <h1 class="mb-2"><i class="bi bi-thermometer-sun"></i> Hitze-Warner</h1>
+    <p class="mb-0 fs-5">Erhalte eine persönliche Hitze-Einschätzung – basierend auf Temperatur, Alter, Luftfeuchtigkeit, Aktivität und deinem Standort.</p>
   </div>
 
-  <script>
-    function pruefen() {
-      let temperatur = Number(document.getElementById("temperatur").value);
-      let alter = Number(document.getElementById("alter").value);
-      let ergebnis = document.getElementById("ergebnis");
-      let stufe;
-      let tipp;
-      let farbe;
+  <div class="row g-4">
+    <!-- ============ EINGABE ============ -->
+    <div class="col-lg-5">
+      <div class="card p-4 shadow-sm mb-4">
+        <h5 class="mb-3"><i class="bi bi-sliders"></i> Deine Angaben</h5>
 
-      if (alter <= 0 || document.getElementById("temperatur").value == "") {
-        ergebnis.innerHTML = "Bitte alles ausfüllen.";
-        ergebnis.className = "alert alert-danger mt-3";
-        return;
-      }
+        <!-- FEATURE: Standort-Wetter -->
+        <button class="btn btn-outline-info w-100 mb-3" id="geoBtn" onclick="ladeStandortWetter()">
+          <i class="bi bi-geo-alt-fill"></i> Wetter an meinem Standort laden
+        </button>
+        <div class="small text-muted mb-3" id="ortAnzeige" style="display:none;"></div>
 
-      if (temperatur < 25) {
-        stufe = "Keine Warnung";
-        farbe = "alert-success";
-        tipp = "Genieße den Tag und trinke regelmäßig.";
-      } else if (temperatur < 30) {
-        stufe = "Es ist warm";
-        farbe = "alert-warning";
-        tipp = "Trinke genug und mache Pausen im Schatten.";
-      } else if (temperatur < 35) {
-        stufe = "Hitzewarnung";
-        farbe = "alert-danger";
-        tipp = "Meide die Mittagssonne und nimm eine Flasche Wasser mit.";
-      } else {
-        stufe = "Extreme Hitze";
-        farbe = "alert-danger";
-        tipp = "Bleibe möglichst an einem kühlen Ort und vermeide Anstrengung.";
-      }
+        <label class="form-label">Temperatur in °C</label>
+        <input class="form-control mb-3" type="number" id="temperatur" placeholder="z.B. 32">
 
-      if (alter < 18 && temperatur >= 25) {
-        tipp = tipp + " Kinder sollten eine Kopfbedeckung tragen und oft Trinkpausen machen.";
-      }
+        <label class="form-label">Alter</label>
+        <input class="form-control mb-3" type="number" id="alter" placeholder="z.B. 30">
 
-      if (alter >= 65 && temperatur >= 25) {
-        tipp = tipp + " Ältere Menschen sollten auch ohne Durst regelmäßig trinken und die Wohnung kühl halten.";
-      }
+        <label class="form-label">Körpergewicht in kg (optional)</label>
+        <input class="form-control mb-3" type="number" id="gewicht" placeholder="z.B. 70">
 
-      ergebnis.innerHTML = "<b>Warnstufe: " + stufe + "</b><br>" + tipp;
-      ergebnis.className = "alert " + farbe + " mt-3";
+        <label class="form-label">Luftfeuchtigkeit in % (optional)</label>
+        <input class="form-control mb-3" type="number" id="feuchte" placeholder="z.B. 60" min="0" max="100">
+
+        <label class="form-label">Geplante Aktivität</label>
+        <select class="form-select mb-3" id="aktivitaet">
+          <option value="ruhe">Ruhe / drinnen</option>
+          <option value="leicht">Leichte Aktivität (Spaziergang)</option>
+          <option value="mittel">Mittel (Radfahren, Gartenarbeit)</option>
+          <option value="hoch">Intensiv (Sport, harte Arbeit)</option>
+        </select>
+
+        <!-- FEATURE: Risikogruppen -->
+        <label class="form-label">Zusätzliche Risikofaktoren (optional)</label>
+        <div class="mb-3">
+          <div class="form-check"><input class="form-check-input risk" type="checkbox" id="r_herz"><label class="form-check-label" for="r_herz">Herz-/Kreislauferkrankung</label></div>
+          <div class="form-check"><input class="form-check-input risk" type="checkbox" id="r_schwanger"><label class="form-check-label" for="r_schwanger">Schwangerschaft</label></div>
+          <div class="form-check"><input class="form-check-input risk" type="checkbox" id="r_medik"><label class="form-check-label" for="r_medik">Einnahme entwässernder Medikamente</label></div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-brand flex-grow-1" onclick="pruefen()"><i class="bi bi-search"></i> Prüfen</button>
+          <button class="btn btn-outline-secondary" onclick="reset()" title="Zurücksetzen"><i class="bi bi-arrow-counterclockwise"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ERGEBNIS ============ -->
+    <div class="col-lg-7">
+      <div class="card p-4 shadow-sm result-card d-none" id="ergebnisCard">
+        <div id="ergebnis"></div>
+
+        <!-- FEATURE: Hitze-Skala -->
+        <div class="heat-gauge">
+          <div class="heat-gauge-marker" id="gaugeMarker" data-temp="" style="left: 0%;"></div>
+        </div>
+        <div class="d-flex justify-content-between small text-muted">
+          <span>15°C</span><span>25°C</span><span>35°C</span><span>45°C</span>
+        </div>
+
+        <!-- FEATURE: Info-Kacheln (gefühlte Temp, UV, Risiko-Score) -->
+        <div class="row g-2 mt-3" id="infoTiles" style="display:none;">
+          <div class="col-4"><div class="info-tile"><div class="lbl">Gefühlt</div><div class="big" id="tileGefuehlt">–</div></div></div>
+          <div class="col-4"><div class="info-tile"><div class="lbl">Risiko-Score</div><div class="big" id="tileRisiko">–</div></div></div>
+          <div class="col-4"><div class="info-tile"><div class="lbl">Nächste Kühlung</div><div class="big" id="tileZeit">–</div></div></div>
+        </div>
+
+        <!-- FEATURE: Trinkziel mit Fortschrittsring -->
+        <div class="mt-3 p-3 rounded glass border" id="trinkBox" style="display:none;">
+          <div class="ring-wrap">
+            <div class="ring" id="trinkRing" style="position:relative;"><span id="ringLabel">0%</span></div>
+            <div>
+              <span class="water-icon"><i class="bi bi-droplet-fill"></i></span>
+              <div id="trinkText" class="mt-1"></div>
+              <div class="mt-2 d-flex gap-2 align-items-center">
+                <button class="btn btn-sm btn-outline-info" onclick="glasTrinken()"><i class="bi bi-cup-straw"></i> +250 ml getrunken</button>
+                <span class="small text-muted" id="trinkStand"></span>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="trinkReset()">reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FEATURE: Empfohlener Zeitplan -->
+        <div class="mt-3" id="zeitplanBox" style="display:none;">
+          <h6 class="mb-2"><i class="bi bi-calendar-check"></i> Empfehlung für heute</h6>
+          <ul class="list-group list-group-flush" id="zeitplanListe"></ul>
+        </div>
+      </div>
+
+      <!-- FEATURE: Symptom-Checker -->
+      <div class="card p-4 shadow-sm mt-4">
+        <h6 class="mb-2"><i class="bi bi-clipboard2-pulse"></i> Symptom-Check: Hitzeerschöpfung?</h6>
+        <p class="small text-muted">Wähle aus, was auf dich zutrifft:</p>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s1"><label class="form-check-label" for="s1">Kopfschmerzen / Schwindel</label></div>
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s2"><label class="form-check-label" for="s2">Übelkeit</label></div>
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s3"><label class="form-check-label" for="s3">Starkes Schwitzen / oder trockene Haut</label></div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s4"><label class="form-check-label" for="s4">Schneller Puls</label></div>
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s5"><label class="form-check-label" for="s5">Muskelkrämpfe</label></div>
+            <div class="form-check symptom-item"><input class="form-check-input sym" type="checkbox" id="s6"><label class="form-check-label" for="s6">Verwirrtheit</label></div>
+          </div>
+        </div>
+        <div class="mt-2" id="symptomErgebnis"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE: Verlauf -->
+  <div class="card p-3 shadow-sm mt-4" id="verlaufCard" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="bi bi-clock-history"></i> Letzte Prüfungen</h5>
+      <button class="btn btn-sm btn-outline-danger" onclick="verlaufLoeschen()">Verlauf löschen</button>
+    </div>
+    <ul class="list-group list-group-flush mt-2" id="verlaufListe"></ul>
+  </div>
+
+  <!-- FEATURE: Notfall-Hinweise -->
+  <div class="card p-4 shadow-sm mt-4 border-danger">
+    <h5 class="text-danger"><i class="bi bi-telephone-fill"></i> Im Notfall</h5>
+    <p class="mb-1">Bei Anzeichen eines <strong>Hitzschlags</strong> (Verwirrtheit, Bewusstlosigkeit, sehr hohe Körpertemperatur) sofort handeln:</p>
+    <ul class="mb-2">
+      <li>Betroffene Person in den Schatten / kühlen Raum bringen</li>
+      <li>Körper mit feuchten Tüchern kühlen, Beine hochlagern</li>
+      <li>Wenn bei Bewusstsein: Wasser trinken lassen</li>
+    </ul>
+    <a href="tel:112" class="btn btn-danger"><i class="bi bi-telephone-outbound-fill"></i> Notruf 112 anrufen</a>
+  </div>
+
+  <small class="d-block mt-3 text-muted">
+    Dies ist nur eine einfache Einschätzung und keine amtliche Hitzewarnung oder medizinische Beratung.
+  </small>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<nav class="nav-foot">
+  <ul class="nav justify-content-center flex-wrap">
+    <li class="nav-item"><a class="nav-link" href="./index.html">Home</a></li>
+    <li class="nav-item"><a class="nav-link" href="./trinkrechner.html">Trink-Rechner</a></li>
+    <li class="nav-item"><a class="nav-link" href="./heatmap.html">Hitze Karte</a></li>
+    <li class="nav-item"><a class="nav-link" href="./about.html">Über uns</a></li>
+    <li class="nav-item"><a class="nav-link" href="./contact.html">Kontakt</a></li>
+    <li class="nav-item"><a class="nav-link" href="./legal/impressum.html">Impressum</a></li>
+    <li class="nav-item"><a class="nav-link" href="./legal/datenschutz.html">Datenschutz</a></li>
+    <li class="nav-item"><a class="nav-link" href="./legal/agb.html">AGB</a></li>
+  </ul>
+</nav>
+<footer class="text-center">
+  <p class="mb-0">&copy; 2026 The Heating Company. Alle Rechte vorbehalten.</p>
+</footer>
+
+<!-- Back to top -->
+<button class="btn btn-brand rounded-circle shadow" id="toTop" title="Nach oben"
+  style="position:fixed;bottom:24px;right:24px;width:48px;height:48px;display:none;z-index:1000;">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ---------- Dark Mode ---------- */
+  const themeToggle = document.getElementById("themeToggle");
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.body.classList.add("dark-mode");
+      themeToggle.className = "bi bi-sun-fill fs-4 theme-toggle";
+    } else {
+      document.body.classList.remove("dark-mode");
+      themeToggle.className = "bi bi-moon-stars-fill fs-4 theme-toggle";
     }
-  </script>
+  }
+  applyTheme(localStorage.getItem("theme") || "light");
+  themeToggle.addEventListener("click", () => {
+    const neu = document.body.classList.contains("dark-mode") ? "light" : "dark";
+    localStorage.setItem("theme", neu);
+    applyTheme(neu);
+  });
+
+  /* ---------- Live-Uhr ---------- */
+  function tick() {
+    document.getElementById("liveClock").innerHTML =
+      '<i class="bi bi-clock"></i> ' + new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'});
+  }
+  tick(); setInterval(tick, 10000);
+
+  /* ---------- Back to top ---------- */
+  const toTop = document.getElementById("toTop");
+  window.addEventListener("scroll", () => toTop.style.display = window.scrollY > 300 ? "block" : "none");
+  toTop.onclick = () => window.scrollTo({top:0, behavior:"smooth"});
+
+  /* ---------- Eingaben speichern ---------- */
+  ["temperatur","alter","gewicht","feuchte","aktivitaet"].forEach(id => {
+    const el = document.getElementById(id);
+    const g = localStorage.getItem("hw_"+id);
+    if (g) el.value = g;
+    el.addEventListener("input", () => localStorage.setItem("hw_"+id, el.value));
+  });
+
+  /* ---------- Hitzeindex ---------- */
+  function hitzeindex(t, rh) {
+    if (t < 27 || !rh) return t;
+    const T=t, R=rh;
+    let hi = -8.784695 + 1.61139411*T + 2.338549*R - 0.14611605*T*R
+      - 0.012308094*T*T - 0.016424828*R*R + 0.002211732*T*T*R
+      + 0.00072546*T*R*R - 0.000003582*T*T*R*R;
+    return Math.round(hi);
+  }
+
+  /* ---------- Trinkempfehlung (jetzt auch gewichtsabhängig) ---------- */
+  function trinkempfehlung(temp, aktivitaet, gewicht) {
+    let basis = gewicht > 0 ? gewicht * 0.033 : 2.0; // 33 ml pro kg
+    if (temp >= 25) basis += 0.5;
+    if (temp >= 30) basis += 0.5;
+    if (temp >= 35) basis += 0.7;
+    const zuschlag = { ruhe:0, leicht:0.3, mittel:0.7, hoch:1.2 };
+    basis += zuschlag[aktivitaet] || 0;
+    return Math.max(1.5, basis);
+  }
+
+  /* ---------- Risiko-Score ---------- */
+  function risikoScore(temp, alter, feuchte, aktivitaet) {
+    let s = 0;
+    if (temp >= 25) s += 1;
+    if (temp >= 30) s += 2;
+    if (temp >= 35) s += 3;
+    if (temp >= 40) s += 3;
+    const gef = hitzeindex(temp, feuchte);
+    if (gef > temp + 3) s += 2;
+    if (alter < 6 || alter >= 65) s += 2;
+    if (alter < 18 && alter >= 6) s += 1;
+    if (aktivitaet === "mittel") s += 1;
+    if (aktivitaet === "hoch") s += 2;
+    if (document.getElementById("r_herz").checked) s += 2;
+    if (document.getElementById("r_schwanger").checked) s += 2;
+    if (document.getElementById("r_medik").checked) s += 2;
+    return s;
+  }
+
+  /* ---------- Standort-Wetter (Open-Meteo, kein Key) ---------- */
+  async function ladeStandortWetter() {
+    const btn = document.getElementById("geoBtn");
+    if (!navigator.geolocation) { alert("Geolocation wird nicht unterstützt."); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Lade Standort...';
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature`;
+        const res = await fetch(url);
+        const data = await res.json();
+        document.getElementById("temperatur").value = Math.round(data.current.temperature_2m);
+        document.getElementById("feuchte").value = data.current.relative_humidity_2m;
+        localStorage.setItem("hw_temperatur", document.getElementById("temperatur").value);
+        localStorage.setItem("hw_feuchte", document.getElementById("feuchte").value);
+        // Ort per Reverse-Geocoding
+        try {
+          const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`).then(r=>r.json());
+          const ort = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || "deinem Standort";
+          const oa = document.getElementById("ortAnzeige");
+          oa.style.display = "block";
+          oa.innerHTML = `<i class="bi bi-pin-map"></i> Aktuell in <strong>${ort}</strong>: ${Math.round(data.current.temperature_2m)}°C, ${data.current.relative_humidity_2m}% Luftfeuchte`;
+        } catch(_) {}
+        btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Wetter geladen!';
+        pruefen();
+      } catch (e) {
+        btn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Fehler beim Laden';
+      }
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Wetter an meinem Standort laden';
+      }, 2500);
+    }, () => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Standort abgelehnt – erneut versuchen';
+    });
+  }
+
+  /* ---------- Gauge ---------- */
+  function updateGauge(temp) {
+    const min=15, max=45;
+    let pct = Math.max(0, Math.min(100, ((temp-min)/(max-min))*100));
+    const m = document.getElementById("gaugeMarker");
+    m.style.left = pct + "%";
+    m.setAttribute("data-temp", temp + "°C");
+  }
+
+  /* ---------- Verlauf ---------- */
+  function verlaufSpeichern(e) {
+    let v = JSON.parse(localStorage.getItem("hw_verlauf") || "[]");
+    v.unshift(e); v = v.slice(0,5);
+    localStorage.setItem("hw_verlauf", JSON.stringify(v));
+    verlaufAnzeigen();
+  }
+  function verlaufAnzeigen() {
+    const v = JSON.parse(localStorage.getItem("hw_verlauf") || "[]");
+    const card = document.getElementById("verlaufCard");
+    const liste = document.getElementById("verlaufListe");
+    if (!v.length) { card.style.display="none"; return; }
+    card.style.display="block";
+    liste.innerHTML = v.map(e =>
+      `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+        <span><i class="bi bi-thermometer-half"></i> ${e.zeit} – ${e.temp}°C</span>
+        <span class="badge ${e.badge}">${e.stufe}</span>
+      </li>`).join("");
+  }
+  function verlaufLoeschen(){ localStorage.removeItem("hw_verlauf"); verlaufAnzeigen(); }
+  verlaufAnzeigen();
+
+  /* ---------- Trinkziel-Tracker ---------- */
+  let trinkZiel = 2.0;
+  function updateTrinkRing() {
+    const getrunken = parseFloat(localStorage.getItem("hw_getrunken") || "0");
+    const pct = Math.min(100, Math.round((getrunken/trinkZiel)*100));
+    const ring = document.getElementById("trinkRing");
+    ring.style.background = `conic-gradient(#0dcaf0 ${pct}%, #dfe3e6 0)`;
+    document.getElementById("ringLabel").textContent = pct + "%";
+    document.getElementById("trinkStand").textContent = `${getrunken.toFixed(2)} / ${trinkZiel.toFixed(1)} L`;
+  }
+  function glasTrinken() {
+    let g = parseFloat(localStorage.getItem("hw_getrunken") || "0") + 0.25;
+    localStorage.setItem("hw_getrunken", g);
+    updateTrinkRing();
+  }
+  function trinkReset(){ localStorage.setItem("hw_getrunken","0"); updateTrinkRing(); }
+
+  /* ---------- Symptom-Checker ---------- */
+  document.querySelectorAll(".sym").forEach(el => el.addEventListener("change", symptomCheck));
+  function symptomCheck() {
+    const n = document.querySelectorAll(".sym:checked").length;
+    const box = document.getElementById("symptomErgebnis");
+    const verwirrt = document.getElementById("s6").checked;
+    if (n === 0) { box.innerHTML=""; return; }
+    if (verwirrt || n >= 4) {
+      box.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-octagon-fill"></i> <strong>Warnzeichen für Hitzschlag!</strong> Sofort kühlen und ggf. Notruf 112.</div>';
+    } else if (n >= 2) {
+      box.innerHTML = '<div class="alert alert-warning mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Mögliche Hitzeerschöpfung. In den Schatten, hinlegen, trinken.</div>';
+    } else {
+      box.innerHTML = '<div class="alert alert-info mb-0"><i class="bi bi-info-circle"></i> Beobachte dich. Trinke und suche kühle Orte auf.</div>';
+    }
+  }
+
+  /* ---------- Reset ---------- */
+  function reset() {
+    ["temperatur","alter","gewicht","feuchte"].forEach(id => document.getElementById(id).value="");
+    document.getElementById("aktivitaet").value="ruhe";
+    document.querySelectorAll(".risk").forEach(c=>c.checked=false);
+    ["hw_temperatur","hw_alter","hw_gewicht","hw_feuchte","hw_aktivitaet"].forEach(k=>localStorage.removeItem(k));
+    document.getElementById("ergebnisCard").classList.add("d-none");
+    document.getElementById("ergebnisCard").classList.remove("show");
+    document.getElementById("ortAnzeige").style.display="none";
+  }
+
+  /* ---------- Hauptfunktion ---------- */
+  function pruefen() {
+    const temperatur = Number(document.getElementById("temperatur").value);
+    const alter = Number(document.getElementById("alter").value);
+    const gewicht = Number(document.getElementById("gewicht").value);
+    const feuchte = Number(document.getElementById("feuchte").value);
+    const aktivitaet = document.getElementById("aktivitaet").value;
+    const ergebnisCard = document.getElementById("ergebnisCard");
+    const ergebnis = document.getElementById("ergebnis");
+
+    const showCard = () => { ergebnisCard.classList.remove("d-none"); setTimeout(()=>ergebnisCard.classList.add("show"),10); };
+
+    if (document.getElementById("temperatur").value==="" || document.getElementById("alter").value==="") {
+      showCard();
+      ergebnis.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-circle"></i> Bitte Temperatur und Alter ausfüllen.</div>';
+      return;
+    }
+    if (alter <= 0 || alter > 120) {
+      showCard();
+      ergebnis.innerHTML = '<div class="alert alert-danger mb-0">Bitte ein realistisches Alter eingeben.</div>';
+      return;
+    }
+
+    let stufe, tipp, farbe, badge, icon;
+    if (temperatur < 25) { stufe="Keine Warnung"; farbe="alert-success"; badge="bg-success"; icon="bi-emoji-smile"; tipp="Genieße den Tag und trinke regelmäßig."; }
+    else if (temperatur < 30) { stufe="Es ist warm"; farbe="alert-warning"; badge="bg-warning text-dark"; icon="bi-thermometer-half"; tipp="Trinke genug und mache Pausen im Schatten."; }
+    else if (temperatur < 35) { stufe="Hitzewarnung"; farbe="alert-danger"; badge="bg-danger"; icon="bi-thermometer-high"; tipp="Meide die Mittagssonne und nimm Wasser mit."; }
+    else { stufe="Extreme Hitze"; farbe="alert-danger"; badge="bg-danger"; icon="bi-fire"; tipp="Bleibe an einem kühlen Ort und vermeide Anstrengung."; }
+
+    if (alter < 18 && temperatur >= 25) tipp += " Kinder brauchen Kopfbedeckung und häufige Trinkpausen.";
+    if (alter >= 65 && temperatur >= 25) tipp += " Ältere Menschen sollten auch ohne Durst trinken und die Wohnung kühl halten.";
+    if (aktivitaet === "hoch" && temperatur >= 28) tipp += " ⚠️ Intensive Aktivität nicht empfohlen – Sport auf morgens/abends verschieben.";
+    else if (aktivitaet === "mittel" && temperatur >= 32) tipp += " Lege häufige Pausen ein.";
+
+    ergebnis.innerHTML =
+      `<div class="alert ${farbe} mb-0 fade-in">
+         <h4 class="mb-1"><i class="bi ${icon}"></i> ${stufe}</h4>
+         <p class="mb-0">${tipp}</p>
+       </div>`;
+
+    updateGauge(temperatur);
+
+    // Info-Kacheln
+    const gef = hitzeindex(temperatur, feuchte);
+    const score = risikoScore(temperatur, alter, feuchte, aktivitaet);
+    let scoreTxt = score<=3 ? "Niedrig" : score<=6 ? "Mittel" : score<=9 ? "Hoch" : "Sehr hoch";
+    let scoreColor = score<=3 ? "#28a745" : score<=6 ? "#fd7e14" : "#dc3545";
+    document.getElementById("infoTiles").style.display="flex";
+    document.getElementById("tileGefuehlt").textContent = (feuchte && temperatur>=27) ? gef+"°C" : temperatur+"°C";
+    const tRis = document.getElementById("tileRisiko");
+    tRis.textContent = scoreTxt; tRis.style.color = scoreColor;
+    document.getElementById("tileZeit").textContent = temperatur>=30 ? "11–17 Uhr" : "–";
+
+    // Trinkziel
+    trinkZiel = trinkempfehlung(temperatur, aktivitaet, gewicht);
+    document.getElementById("trinkBox").style.display="block";
+    document.getElementById("trinkText").innerHTML =
+      `<strong>Trinkziel heute: ca. ${trinkZiel.toFixed(1)} L Wasser</strong>` +
+      (gewicht>0 ? `<div class="small text-muted">basierend auf ${gewicht} kg Körpergewicht</div>` : "");
+    updateTrinkRing();
+
+    // Zeitplan
+    const zBox = document.getElementById("zeitplanBox");
+    const zListe = document.getElementById("zeitplanListe");
+    let plan = [];
+    if (temperatur >= 25) {
+      plan.push(["bi-sunrise","Vor 10 Uhr","Aktivitäten & Lüften erledigen, solange es kühl ist"]);
+      plan.push(["bi-house-door","11–17 Uhr","Drinnen bleiben, Fenster/Rollos geschlossen halten"]);
+      plan.push(["bi-droplet","Ganztags",`Alle 1–2 Std. trinken (Ziel ${trinkZiel.toFixed(1)} L)`]);
+      plan.push(["bi-sunset","Nach 19 Uhr","Kühlere Zeit für Sport & Besorgungen nutzen"]);
+      if (temperatur >= 35) plan.push(["bi-snow","Bei Bedarf","Kühle Dusche / feuchte Tücher gegen Überhitzung"]);
+      zBox.style.display="block";
+      zListe.innerHTML = plan.map(p =>
+        `<li class="list-group-item bg-transparent d-flex gap-2 align-items-start">
+          <i class="bi ${p[0]} fs-5 text-warning"></i>
+          <div><strong>${p[1]}</strong><div class="small text-muted">${p[2]}</div></div>
+        </li>`).join("");
+    } else { zBox.style.display="none"; }
+
+    showCard();
+
+    verlaufSpeichern({
+      zeit: new Date().toLocaleTimeString("de-DE",{hour:'2-digit',minute:'2-digit'}),
+      temp: temperatur, stufe, badge
+    });
+  }
+
+  /* ---------- Enter-Taste ---------- */
+  document.querySelectorAll("#temperatur,#alter,#gewicht,#feuchte").forEach(el =>
+    el.addEventListener("keypress", e => { if(e.key==="Enter") pruefen(); }));
+</script>
 </body>
 </html>
